@@ -1,8 +1,19 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import React from 'react';
+import { useRouter } from 'expo-router';
+import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function SplashScreen() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.replace('/login-selection');
+    }, 2000); // Navigate after 2 seconds
+
+    return () => clearTimeout(timer);
+  }, [router]);
+
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
