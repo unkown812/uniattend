@@ -10,6 +10,8 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    ClashDisplay: require('../assets/fonts/ClashDisplay-Variable.ttf'),
+    ClashGrostek: require('../assets/fonts/ClashGrotesk-Variable.ttf'),
   });
 
   if (!loaded) {

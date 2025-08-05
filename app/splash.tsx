@@ -1,4 +1,3 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View,Image } from 'react-native';
@@ -9,7 +8,7 @@ export default function SplashScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       router.replace('/login-selection');
-    }, 2000); 
+    }, 4000); 
 
     return () => clearTimeout(timer);
   }, [router]);
@@ -17,8 +16,8 @@ export default function SplashScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
-        <MaterialIcons name="person" size={100} color="#004d40" />
-        <Image source={require('./assets/logo.png')} style={styles.checkIcon} />
+        {/* <MaterialIcons name="person" size={100} color="#004d40" /> */}
+        <Image source={require('../assets/images/logo.png')} style={styles.checkIcon} />
       </View>
       <Text style={styles.title}>UniAttend</Text>
       <Text style={styles.subtitle}>Attendance Made Easy.</Text>
@@ -40,19 +39,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   checkIcon: {
-    position: 'absolute',
-    right: -10,
-    top: 10,
+    alignSelf: 'center',
+    height: 180,
+    width: 180,
   },
   title: {
     fontSize: 32,
-    fontFamily: 'Cochin',
+    fontFamily: "Playwrite US Modern",
     color: '#004d40',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 18,
-    fontFamily: 'Snell Roundhand',
+    fontFamily: "Playwrite US Modern",
     color: '#7a7a7a',
   },
 });
