@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View,Image } from 'react-native';
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -9,7 +9,7 @@ export default function SplashScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       router.replace('/login-selection');
-    }, 2000); // Navigate after 2 seconds
+    }, 2000); 
 
     return () => clearTimeout(timer);
   }, [router]);
@@ -18,12 +18,7 @@ export default function SplashScreen() {
     <View style={styles.container}>
       <View style={styles.iconContainer}>
         <MaterialIcons name="person" size={100} color="#004d40" />
-        <MaterialIcons
-          name="check-circle"
-          size={40}
-          color="#4caf50"
-          style={styles.checkIcon}
-        />
+        <Image source={require('./assets/logo.png')} style={styles.checkIcon} />
       </View>
       <Text style={styles.title}>UniAttend</Text>
       <Text style={styles.subtitle}>Attendance Made Easy.</Text>
