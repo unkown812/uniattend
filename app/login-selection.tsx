@@ -1,21 +1,24 @@
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View,Image } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function LoginSelectionScreen() {
+
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Who Are You ?</Text>
       <Text style={styles.subtitle}>Login to Continue</Text>
 
-      <TouchableOpacity style={styles.button} onPress={() => { /* TODO: Handle Teacher login */ }}>
-        <MaterialCommunityIcons name="account-tie" size={60} color="#004d40" />
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/teacher-login')}>
         <Text style={styles.buttonText}>Teacher</Text>
+        <Image source={require('../assets/images/teacher.png')} style={styles.buttonImage}/>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => { /* TODO: Handle Student login */ }}>
-        <MaterialIcons name="school" size={60} color="#004d40" />
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/student-signin')}>
         <Text style={styles.buttonText}>Student</Text>
+        <Image source={require('../assets/images/mortarboard.png')} style={styles.buttonImage} />
       </TouchableOpacity>
     </View>
   );
@@ -34,11 +37,13 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '400',
     marginBottom: 4,
+    fontFamily: "ClashDisplay",
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 20,
     color: '#555',
+    fontFamily: "ClashDisplay",
   },
   button: {
     backgroundColor: '#a9cbb7',
@@ -52,11 +57,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
+    fontFamily: "ClashDisplay",
   },
   buttonText: {
+    fontFamily: "ClashDisplay",
     marginTop: 10,
     fontSize: 24,
     fontWeight: 'bold',
     color: '#000',
+  },
+  buttonImage: {
+    marginTop: 10,
+    height: 80,
+    width: 80,
   },
 });
