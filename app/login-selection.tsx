@@ -11,7 +11,7 @@ export default function LoginSelectionScreen() {
       <Text style={styles.title}>Who Are You ?</Text>
       <Text style={styles.subtitle}>Login to Continue</Text>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/teacher-login')}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/teacher-signin')}>
         <Text style={styles.buttonText}>Teacher</Text>
         <Image source={require('../assets/images/teacher.png')} style={styles.buttonImage}/>
       </TouchableOpacity>
@@ -34,21 +34,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 28,
-    fontWeight: '400',
+    fontSize: 40,
+    fontWeight: '100',
     marginBottom: 4,
     fontFamily: "ClashDisplay",
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 20,
+    fontWeight: 'normal',
     color: '#555',
     fontFamily: "ClashDisplay",
   },
   button: {
     backgroundColor: '#a9cbb7',
-    width: 250,
-    height: 140,
+    width: 350,
+    height: 240,
     borderRadius: 20,
     marginVertical: 10,
     justifyContent: 'center',
