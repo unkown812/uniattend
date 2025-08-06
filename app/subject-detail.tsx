@@ -1,23 +1,22 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View ,Image} from 'react-native';
 
 export default function SubjectDetailScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Subject</Text>
-
       <View style={styles.card}>
         <Text style={styles.subjectName}>Subject Name</Text>
         <Text style={styles.subjectCode}>Subject Code: XXX</Text>
-
         <TouchableOpacity style={styles.studentListButton} onPress={() => { /* TODO: Handle student list */ }}>
           <Text style={styles.studentListButtonText}>Student List</Text>
         </TouchableOpacity>
+        <Image source={require('../assets/images/Subjects.png')} style={styles.studentListImage}
+        <TouchableOpacity style={styles.activateButton} onPress={() => { /* TODO: Handle activate */ }}>
+          <Text style={styles.activateButtonText}>Activate</Text>
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.activateButton} onPress={() => { /* TODO: Handle activate */ }}>
-        <Text style={styles.activateButtonText}>Activate</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -31,45 +30,87 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 40,
     marginBottom: 20,
+    marginTop: 100,
+    fontWeight: '400',
+    color: '#000',
+    fontFamily: "ClashDisplay",
   },
   card: {
     width: '90%',
+    height: "60%",
     backgroundColor: '#a9cbb7',
     borderRadius: 20,
     padding: 20,
     alignItems: 'center',
-    marginBottom: 30,
+    shadowColor: "rgba(0, 0, 0, 0.65)",
+    shadowOffset: {
+      width: 2,
+      height: 4
+    },
+    shadowRadius: 4,
+    elevation: 4,
+    shadowOpacity: 3,
+    borderStyle: "solid",
+    borderColor: "#000",
+    borderWidth: 1,
   },
   subjectName: {
-    fontSize: 22,
-    marginBottom: 10,
+    fontSize: 32,
+    marginTop: 50,
+    marginBottom: 50,
+    fontWeight: '400',
+    color: '#000',
+    fontFamily: "ClashDisplay",
   },
   subjectCode: {
-    fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 50,
+    fontWeight: '400',
+    color: '#000',
+    fontFamily: "ClashDisplay",
   },
   studentListButton: {
     backgroundColor: '#d3d3c9',
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 30,
+    borderStyle: "solid",
+    borderColor: "#000",
+    borderWidth: 1,
+    shadowColor: "rgba(0, 0, 0, 0.65)",
+    shadowOffset: {
+      width: 2,
+      height: 4
+    },
+    shadowRadius: 4,
+    elevation: 4,
+    shadowOpacity: 3,
   },
   studentListButtonText: {
-    fontSize: 16,
+    fontSize: 24,
+    fontWeight: '400',
     color: '#000',
+    fontFamily: "ClashDisplay",
+  },
+  studentListImage: {
+    marginTop: 50,
+    marginBottom: 50,
+    height: 120,
+    width: 200,
   },
   activateButton: {
-    width: '90%',
+    width: '60%',
     backgroundColor: '#4a7c59',
     borderRadius: 20,
     paddingVertical: 15,
     alignItems: 'center',
+    marginTop: 30,
   },
   activateButtonText: {
-    fontSize: 18,
+    fontSize: 24,
+    fontWeight: '400',
     color: '#000',
+    fontFamily: "ClashDisplay",
   },
 });

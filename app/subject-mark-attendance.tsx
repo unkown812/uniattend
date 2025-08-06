@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View,Image } from 'react-native';
 
 export default function SubjectMarkAttendanceScreen() {
   return (
@@ -9,7 +9,7 @@ export default function SubjectMarkAttendanceScreen() {
       <View style={styles.card}>
         <Text style={styles.subjectName}>Subject Name</Text>
         <Text style={styles.subjectId}>Subject ID: XXX</Text>
-
+        <Image source={require('../assets/images/Subjects.png')} style={styles.subjectImage}/>
         <TouchableOpacity style={styles.markAttendanceButton} onPress={() => { /* TODO: Handle mark attendance */ }}>
           <Text style={styles.markAttendanceButtonText}>Mark Attendance</Text>
         </TouchableOpacity>
@@ -54,15 +54,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   subjectName: {
-    fontSize: 22,
-    marginBottom: 10,
+    fontSize: 32,
+    marginTop: 50,
+    marginBottom: 50,
     fontWeight: '400',
     color: '#000',
     fontFamily: "ClashDisplay",
   },
+  subjectImage: {
+    marginTop: 50,
+    marginBottom: 50,
+    height: 120,
+    width: 200,
+  },
   subjectId: {
-    fontSize: 16,
-    marginBottom: 20,
+    fontSize: 24,
+    marginBottom: 60,
     fontWeight: '400',
     color: '#000',
     fontFamily: "ClashDisplay",
@@ -72,9 +79,20 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 30,
+    borderStyle: "solid",
+    borderColor: "#000",
+    borderWidth: 1,
+    shadowColor: "rgba(0, 0, 0, 0.65)",
+    shadowOffset: {
+      width: 2,
+      height: 4
+    },
+    shadowRadius: 4,
+    elevation: 4,
+    shadowOpacity: 3,
   },
   markAttendanceButtonText: {
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: '400',
     color: '#000',
     fontFamily: "ClashDisplay",
