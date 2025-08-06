@@ -1,12 +1,15 @@
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { Image, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function StudentSigninScreen() {
   const [name, setName] = useState('');
   const [course, setCourse] = useState('');
   const [sem, setSem] = useState('');
   const [rollNo, setRollNo] = useState('');
+
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -62,7 +65,7 @@ export default function StudentSigninScreen() {
         keyboardType="numeric"
       />
 
-      <TouchableOpacity style={styles.button} onPress={() => { /* TODO: Handle continue */ }}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/subjects-students')}>
         <Text style={styles.buttonText}>Continue</Text>
       </TouchableOpacity>
     </View>

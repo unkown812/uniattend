@@ -1,6 +1,6 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View,Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function LoginSelectionScreen() {
 
@@ -36,13 +36,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 40,
     marginBottom: 4,
-    fontWeight: '100',
+    fontWeight: '400',
     fontFamily: "ClashDisplay",
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 20,
-    fontWeight: 'normal',
+    fontWeight: '400',
     color: '#555',
     fontFamily: "ClashDisplay",
   },
@@ -58,13 +58,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
-    fontFamily: "ClashDisplay",
   },
   buttonText: {
-    fontFamily: "ClashDisplay",
+    fontFamily: 'ClashDisplay',
     marginTop: 10,
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#000',
   },
   buttonImage: {

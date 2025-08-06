@@ -4,11 +4,12 @@ import { useRouter } from 'expo-router';
 
 export default function TeacherSigninScreen() {
   const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
   const router = useRouter();
   return (
     <View style={styles.container}>
       <Image source={require('../assets/images/teacherIllustration.png')} style={styles.image} />
-      <Text style={styles.title}>The name is ..?</Text>
+      <Text style={styles.title}>Staff Login</Text>
 
       <TextInput
         style={styles.input}
@@ -18,7 +19,15 @@ export default function TeacherSigninScreen() {
         onChangeText={setName}
       />
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/subjects')}>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter Password"
+        placeholderTextColor={"rgba(0, 0, 0, 0.5)"}
+        value={password}
+        onChangeText={setPassword}
+      />
+
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/subjects-teachers')}>
         <Text style={styles.buttonText}>Continue</Text>
       </TouchableOpacity>
 

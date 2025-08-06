@@ -27,24 +27,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 40,
     marginBottom: 20,
+    marginTop: 100,
+    fontWeight: '400',
+    color: '#000',
+    fontFamily: "ClashDisplay",
   },
   card: {
     width: '90%',
+    height: "60%",
     backgroundColor: '#a9cbb7',
     borderRadius: 20,
     padding: 20,
     alignItems: 'center',
+    shadowColor: "rgba(0, 0, 0, 0.65)",
+    shadowOffset: {
+      width: 2,
+      height: 4
+    },
+    shadowRadius: 4,
+    elevation: 4,
+    shadowOpacity: 3,
+    borderStyle: "solid",
+    borderColor: "#000",
+    borderWidth: 1,
   },
   subjectName: {
     fontSize: 22,
     marginBottom: 10,
+    fontWeight: '400',
+    color: '#000',
+    fontFamily: "ClashDisplay",
   },
   subjectId: {
     fontSize: 16,
     marginBottom: 20,
+    fontWeight: '400',
+    color: '#000',
+    fontFamily: "ClashDisplay",
   },
   markAttendanceButton: {
     backgroundColor: '#d3d3c9',
@@ -54,6 +75,8 @@ const styles = StyleSheet.create({
   },
   markAttendanceButtonText: {
     fontSize: 16,
+    fontWeight: '400',
     color: '#000',
+    fontFamily: "ClashDisplay",
   },
 });

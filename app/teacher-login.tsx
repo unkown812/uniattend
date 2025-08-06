@@ -24,6 +24,7 @@ export default function TeacherLoginScreen() {
           selectedValue={course}
           onValueChange={(itemValue: string) => setCourse(itemValue)}
           style={styles.picker}
+          itemStyle={styles.pickerContainer}
           dropdownIconColor="#555"
         >
           <Picker.Item label="Enter Course" value="" />

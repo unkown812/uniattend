@@ -24,10 +24,11 @@ export default function RootLayout() {
         <Stack.Screen name="student-signin" options={{ headerShown: false }} />
         <Stack.Screen name="teacher-signin" options={{ headerShown: false }} />
         <Stack.Screen name="teacher-login" options={{ headerShown: false }} />
-        <Stack.Screen name="subjects" options={{ headerShown: false }} />
+        <Stack.Screen name="subjects-teachers" options={{ headerShown: false }} />
+        <Stack.Screen name="subjects-students" options={{ headerShown: false }} />
         <Stack.Screen name="subject-detail" options={{ headerShown: false }} />
         <Stack.Screen name="students" options={{ headerShown: false }} />
-        <Stack.Screen name="subjects-student" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="subjects-student" options={{ headerShown: false }} /> */}
         <Stack.Screen name="subject-mark-attendance" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)/index" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
