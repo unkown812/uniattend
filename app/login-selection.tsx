@@ -35,8 +35,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 40,
-    fontWeight: '100',
     marginBottom: 4,
+    fontWeight: '100',
     fontFamily: "ClashDisplay",
   },
   subtitle: {

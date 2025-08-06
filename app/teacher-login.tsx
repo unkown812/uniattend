@@ -9,7 +9,7 @@ export default function TeacherLoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/images/teacher.png')} style={styles.image} />
+      <Image source={require('../assets/images/teacherIllustration.png')} style={styles.image} />
       <Text style={styles.title}>The name is ..?</Text>
 
       <TextInput
@@ -39,6 +39,7 @@ export default function TeacherLoginScreen() {
           selectedValue={semester}
           onValueChange={(itemValue: string) => setSemester(itemValue)}
           style={styles.picker}
+          itemStyle={styles.picker}
           dropdownIconColor="#555"
         >
           <Picker.Item label="Enter Semester" value="" />
@@ -73,8 +74,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: 140,
-    height: 140,
+    marginTop: 130,
+    width: 340,
+    height: 340,
     borderRadius: 70,
     marginVertical: 30,
   },
@@ -85,36 +87,70 @@ const styles = StyleSheet.create({
   input: {
     width: '90%',
     height: 50,
-    backgroundColor: '#a9cbb7',
-    borderRadius: 20,
+    backgroundColor: "rgba(0, 64, 48, 0.25)",
     paddingHorizontal: 15,
-    marginBottom: 15,
+    marginBottom: 20,
     fontSize: 16,
+    fontWeight: '100',
+    fontFamily: "ClashDisplay",
+    shadowColor: "rgba(0, 0, 0, 0.25)",
+    shadowOffset: {
+      width: 0,
+      height: 4
+    },
+    shadowRadius: 4,
+    elevation: 4,
+    shadowOpacity: 1,
+    borderRadius: 30,
+    borderStyle: "solid",
+    borderColor: "#000",
+    borderWidth: 1,
   },
   pickerContainer: {
     width: '90%',
     height: Platform.OS === 'android' ? 50 : undefined,
-    backgroundColor: '#a9cbb7',
-    borderRadius: 20,
+    backgroundColor: "rgba(0, 64, 48, 0.25)",
     marginVertical: 8,
     justifyContent: 'center',
+    fontSize: 16,
+    fontWeight: '100',
+    fontFamily: "ClashDisplay",
+    shadowColor: "rgba(0, 0, 0, 0.25)",
+    shadowOffset: {
+      width: 0,
+      height: 4
+    },
+    shadowRadius: 4,
+    elevation: 4,
+    shadowOpacity: 1,
+    borderRadius: 30,
+    borderStyle: "solid",
+    borderColor: "#000",
+    borderWidth: 1,
   },
   picker: {
     width: '100%',
     color: '#000',
+    fontWeight: '100',
+    fontFamily: "ClashDisplay",
+    fontSize: 16,
+    paddingHorizontal: 15,
   },
   button: {
-    width: '90%',
-    height: 50,
+    width: '70%',
+    height: 60,
     backgroundColor: '#4a7c59',
-    borderRadius: 20,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginBottom: 50,
+    marginTop: 100,
   },
   buttonText: {
     color: '#000',
-    fontSize: 18,
+    fontSize: 26,
+    fontWeight: '100',
+    fontFamily: "ClashDisplay",
   },
   registeredText: {
     color: '#555',
