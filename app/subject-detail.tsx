@@ -11,7 +11,7 @@ export default function SubjectDetailScreen() {
         <TouchableOpacity style={styles.studentListButton} onPress={() => { /* TODO: Handle student list */ }}>
           <Text style={styles.studentListButtonText}>Student List</Text>
         </TouchableOpacity>
-        <Image source={require('../assets/images/Subjects.png')} style={styles.studentListImage}
+        <Image source={require('../assets/images/Subjects.png')} style={styles.studentListImage}/>
         <TouchableOpacity style={styles.activateButton} onPress={() => { /* TODO: Handle activate */ }}>
           <Text style={styles.activateButtonText}>Activate</Text>
         </TouchableOpacity>
