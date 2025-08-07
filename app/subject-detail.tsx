@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View ,Image} from 'react-native';
 
@@ -8,10 +9,10 @@ export default function SubjectDetailScreen() {
       <View style={styles.card}>
         <Text style={styles.subjectName}>Subject Name</Text>
         <Text style={styles.subjectCode}>Subject Code: XXX</Text>
-        <TouchableOpacity style={styles.studentListButton} onPress={() => { /* TODO: Handle student list */ }}>
-          <Text style={styles.studentListButtonText}>Student List</Text>
-        </TouchableOpacity>
         <Image source={require('../assets/images/Subjects.png')} style={styles.studentListImage}/>
+        <TouchableOpacity style={styles.studentListButton} onPress={() => router.push("/students")}>
+          <Text style={styles.studentListButtonText}>Student   List</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.activateButton} onPress={() => { /* TODO: Handle activate */ }}>
           <Text style={styles.activateButtonText}>Activate</Text>
         </TouchableOpacity>
@@ -39,7 +40,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '90%',
-    height: "60%",
+    height: "70%",
     backgroundColor: '#a9cbb7',
     borderRadius: 20,
     padding: 20,

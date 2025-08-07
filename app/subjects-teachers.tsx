@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const subjects = [
   { id: '1', name: 'DSD', status: 'red' },
@@ -34,9 +34,11 @@ export default function SubjectsScreen() {
           <Text style={styles.title}>Subjects</Text>
           <Text style={styles.subtitle}>List of all subjects</Text>
         </View>
-        <TouchableOpacity style={styles.profileIcon}>
-          <MaterialIcons name="person" size={24} color="#004d40" />
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.profileIcon}>
+            <MaterialIcons name="person" size={24} color="#004d40" />
+          </TouchableOpacity>
+        </View>
       </View>
       <FlatList
         data={subjects}
@@ -47,6 +49,7 @@ export default function SubjectsScreen() {
       <TouchableOpacity style={styles.addButton} onPress={() => { /* TODO: Add subject */ }}>
         <Text style={styles.addButtonText}>Add Subject</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
@@ -63,6 +66,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  exportButton: {
+    backgroundColor: '#a9cbb7',
+    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#000',
+    fontFamily: "ClashDisplay",
+    fontWeight: "400",
+  },
+  exportButtonText: {
+    fontSize: 16,
+    color: '#000',
+    fontFamily: "ClashDisplay",
   },
   profileIcon: {
     backgroundColor: '#a9cbb7',
@@ -130,4 +153,5 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     fontFamily: "ClashDisplay",
   },
+
 });

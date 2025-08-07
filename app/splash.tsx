@@ -29,10 +29,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff9f0',
-    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 20,
   },
   iconContainer: {
     position: 'relative',
