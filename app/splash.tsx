@@ -43,13 +43,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontFamily: "Playwrite US Modern",
+    fontFamily: "Playwrite",
     color: '#004d40',
+    // fontWeight: "bold",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 18,
-    fontFamily: "Playwrite US Modern",
+    fontFamily: "Playwrite",
+    fontWeight: "400",
     color: '#7a7a7a',
   },
 });

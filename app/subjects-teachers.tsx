@@ -45,10 +45,9 @@ export default function SubjectsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
       />
-      <TouchableOpacity style={styles.addButton} onPress={() => { /* TODO: Add subject */ }}>
+      <TouchableOpacity style={styles.addButton} onPress={() => {router.push('/add-subject') }}>
         <Text style={styles.addButtonText}>Add Subject</Text>
       </TouchableOpacity>
-
     </View>
   );
 }

@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   studentName: {
-    fontSize: 20,
+    fontSize: 28,
     color: '#000',
     fontFamily: "ClashDisplay",
     fontWeight: "400",
   },
   studentDetails: {
-    fontSize: 14,
+    fontSize: 20,
     fontFamily: "ClashDisplay",
     fontWeight: "400",
     color: '#333',
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0, 0, 0, 0.63)',
     justifyContent: 'flex-end',
     alignItems: 'baseline',
   },
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   popupButton: {
     width: '80%',
-    backgroundColor: '#d3d3c9',
+    backgroundColor: '#a9cbb7',
     borderRadius: 20,
     paddingVertical: 15,
     paddingHorizontal: 30,
