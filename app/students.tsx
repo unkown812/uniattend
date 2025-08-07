@@ -112,9 +112,13 @@ const styles = StyleSheet.create({
   studentName: {
     fontSize: 20,
     color: '#000',
+    fontFamily: "ClashDisplay",
+    fontWeight: "400",
   },
   studentDetails: {
     fontSize: 14,
+    fontFamily: "ClashDisplay",
+    fontWeight: "400",
     color: '#333',
   },
   statusIndicator: {
