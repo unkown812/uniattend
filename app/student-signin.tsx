@@ -33,7 +33,7 @@ export default function StudentSigninScreen() {
       // Check if student exists
       const { data: existingStudent, error: checkError } = await supabase
         .from("students")
-        .select("*")
+        .select("id")
         .eq("roll", parseInt(rollNo))
         .eq("course", course)
         .single();
@@ -43,35 +43,41 @@ export default function StudentSigninScreen() {
       }
 
       if (existingStudent) {
-        // Student exists, navigate to subjects
+        // Student exists, navigate directly
         router.push({
           pathname: "/subjects-students",
           params: { studentId: existingStudent.id, course, sem }
         });
-      } else {
-        // Create new student
-        const { data: newStudent, error: insertError } = await supabase
-          .from("students")
-          .insert({
-            username: name,
-            course,
-            sem: parseInt(sem),
-            roll: parseInt(rollNo),
-            password: "default123" // Default password for new students
-          })
-          .select()
-          .single();
-
-        if (insertError) throw insertError;
-
-        Alert.alert("Success", "Student profile created successfully");
-        router.push({
-          pathname: "/subjects-students",
-          params: { studentId: newStudent.id, course, sem }
-        });
+        return;
       }
+
+      // Insert new student - matching exact database fields
+      const { data: newStudent, error: insertError } = await supabase
+        .from("students")
+        .insert({
+          username: name,
+          course,
+          sem: parseInt(sem),
+          roll: parseInt(rollNo),
+          password: "default123" // Default password for new students
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      Alert.alert("Success", "Student profile created successfully");
+      router.push({
+        pathname: "/subjects-students",
+        params: { id: newStudent.id, course, sem }
+      });
+
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to sign in");
+      console.error("Sign in error:", error);
+      const errorMessage = error?.message || error?.details || "Failed to sign in";
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }

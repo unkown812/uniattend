@@ -21,7 +21,7 @@ export default function SubjectsScreen() {
   const renderItem = ({ item }: { item: { id: number; name: string; code: string; is_active: boolean } }) => (
     <TouchableOpacity 
       style={styles.subjectItem} 
-      onPress={() => router.push(`/subject-mark-attendance?subjectId=${item.id}&subjectName=${item.name}&studentId=${params.studentId}`)}
+      onPress={() => router.push(`/subject-mark-attendance?subjectId=${item.id}&subject-Name=${item.name}&studentId=${params.studentId}`)}
     >
       <Text style={styles.subjectText}>{item.name}</Text>
       <View

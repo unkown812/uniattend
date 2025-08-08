@@ -14,6 +14,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 import { useRouter } from 'expo-router';
+import { COURSES } from '../types/database';
 
 export default function AddSubjectScreen() {
   const { user } = useAuth();
@@ -32,14 +33,15 @@ export default function AddSubjectScreen() {
   const fetchCourses = async () => {
     try {
       const { data, error } = await supabase
-        .from('courses')
-        .select('name')
-        .order('name');
+        .from('subjects')
+        .select('course')
+        .not('course', 'is', null);
       
       if (error) throw error;
       
       if (data) {
-        setCourses(data.map(c => c.name));
+        const uniqueCourses = [...new Set(data.map(item => item.course))].sort();
+        setCourses(uniqueCourses);
       }
     } catch (error) {
       console.error('Error fetching courses:', error);
@@ -77,7 +79,7 @@ export default function AddSubjectScreen() {
           code: subjectCode.toUpperCase(),
           course: course,
           semester: parseInt(semester),
-          teacher_id: user?.id,
+          // teacher_id: user?.id,
         })
         .select()
         .single();
