@@ -1,11 +1,49 @@
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { supabase } from '../utils/supabase';
 
 export default function TeacherSigninScreen() {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const handleSignIn = async () => {
+    if (!name || !password) {
+      Alert.alert('Error', 'Please enter both name and password');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Query the teachers table for authentication
+      const { data, error } = await supabase
+        .from('teachers')
+        .select('*')
+        .eq('username', name)
+        .eq('password', password)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        // Successful login
+        Alert.alert('Success', 'Login successful!');
+        router.push('/subjects-teachers');
+      } else {
+        Alert.alert('Error', 'Invalid credentials');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert('Error', 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Image source={require('../assets/images/teacherIllustration.png')} style={styles.image} />
@@ -17,6 +55,7 @@ export default function TeacherSigninScreen() {
         placeholderTextColor={"rgba(0, 0, 0, 0.5)"}
         value={name}
         onChangeText={setName}
+        autoCapitalize="none"
       />
 
       <TextInput
@@ -25,10 +64,18 @@ export default function TeacherSigninScreen() {
         placeholderTextColor={"rgba(0, 0, 0, 0.5)"}
         value={password}
         onChangeText={setPassword}
+        secureTextEntry
+        autoCapitalize="none"
       />
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/subjects-teachers')}>
-        <Text style={styles.buttonText}>Continue</Text>
+      <TouchableOpacity 
+        style={[styles.button, loading && styles.disabledButton]} 
+        onPress={handleSignIn}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? 'Signing In...' : 'Continue'}
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push('/teacher-login')}>
@@ -90,6 +137,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 50,
     marginTop: 100,
+  },
+  disabledButton: {
+    backgroundColor: '#cccccc',
   },
   buttonText: {
     color: '#000',

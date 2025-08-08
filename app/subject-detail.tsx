@@ -1,23 +1,110 @@
-import { router } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View ,Image} from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
+import { supabase } from '../utils/supabase';
+import { Subject } from '../types/database';
 
 export default function SubjectDetailScreen() {
+  const { subjectId } = useLocalSearchParams<{ subjectId: string }>();
+  const [subject, setSubject] = useState<Subject | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (subjectId) {
+      fetchSubject();
+    }
+  }, [subjectId]);
+
+  const fetchSubject = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('id', subjectId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setSubject(data);
+    } catch (err) {
+      console.error('Error fetching subject:', err);
+      setError('Failed to load subject details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleActivate = async () => {
+    if (!subject) return;
+
+    try {
+      const { error } = await supabase
+        .from('subjects')
+        .update({ is_active: !subject.is_active })
+        .eq('id', subjectId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Refresh the subject data
+      fetchSubject();
+    } catch (err) {
+      console.error('Error updating subject status:', err);
+      setError('Failed to update subject status');
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#4a7c59" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchSubject}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!subject) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Text style={styles.errorText}>Subject not found</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Subject</Text>
       <View style={styles.card}>
-        <Text style={styles.subjectName}>Subject Name</Text>
-        <Text style={styles.subjectCode}>Subject Code: XXX</Text>
+        <Text style={styles.subjectName}>{subject.name}</Text>
+        <Text style={styles.subjectCode}>Subject Code: {subject.code}</Text>
         <Image source={require('../assets/images/Subjects.png')} style={styles.studentListImage}/>
-        <TouchableOpacity style={styles.studentListButton} onPress={() => router.push("/students")}>
+        <TouchableOpacity style={styles.studentListButton} onPress={() => router.push(`/students?subjectId=${subjectId}`)}>
           <Text style={styles.studentListButtonText}>Student   List</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.activateButton} onPress={() => { /* TODO: Handle activate */ }}>
-          <Text style={styles.activateButtonText}>Activate</Text>
+        <TouchableOpacity 
+          style={[styles.activateButton, { backgroundColor: subject.is_active ? '#e74c3c' : '#4a7c59' }]} 
+          onPress={handleActivate}
+        >
+          <Text style={styles.activateButtonText}>
+            {subject.is_active ? 'Deactivate' : 'Activate'}
+          </Text>
         </TouchableOpacity>
       </View>
-
     </View>
   );
 }
@@ -29,6 +116,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     alignItems: 'center',
+  },
+  centerContent: {
+    justifyContent: 'center',
   },
   title: {
     fontSize: 40,
@@ -112,6 +202,23 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '400',
     color: '#000',
+    fontFamily: "ClashDisplay",
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#e74c3c',
+    marginBottom: 20,
+    fontFamily: "ClashDisplay",
+  },
+  retryButton: {
+    backgroundColor: '#4a7c59',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+  },
+  retryButtonText: {
+    fontSize: 18,
+    color: '#fff',
     fontFamily: "ClashDisplay",
   },
 });

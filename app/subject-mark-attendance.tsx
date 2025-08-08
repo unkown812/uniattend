@@ -1,17 +1,82 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View,Image } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Alert } from 'react-native';
+import { supabase } from '../utils/supabase';
+import { Subject } from '../types/database';
 
 export default function SubjectMarkAttendanceScreen() {
+  const { subjectId } = useLocalSearchParams<{ subjectId: string }>();
+  const [subject, setSubject] = useState<Subject | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [markingAttendance, setMarkingAttendance] = useState(false);
+
+  useEffect(() => {
+    if (subjectId) {
+      fetchSubject();
+    }
+  }, [subjectId]);
+
+  const fetchSubject = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('id', subjectId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setSubject(data);
+    } catch (err) {
+      console.error('Error fetching subject:', err);
+      setError('Failed to load subject details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMarkAttendance = async () => {
+    if (!subject) return;
+
+    setMarkingAttendance(true);
+    try {
+      // Navigate to attendance marking screen with subject context
+      router.push(`/subject-mark-attendance?subjectId=${subjectId}&subjectName=${subject.name}`);
+    } catch (err) {
+      console.error('Error navigating to attendance:', err);
+      setError('Failed to navigate to attendance marking');
+    } finally {
+      setMarkingAttendance(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Subject</Text>
+      <Text style={styles.title}>Mark Attendance</Text>
 
       <View style={styles.card}>
-        <Text style={styles.subjectName}>Subject Name</Text>
-        <Text style={styles.subjectId}>Subject ID: XXX</Text>
+        <Text style={styles.subjectName}>{subject?.name || 'Subject Name'}</Text>
+        <Text style={styles.subjectId}>Subject Code: {subject?.code || 'Subject Code'}</Text>
         <Image source={require('../assets/images/Subjects.png')} style={styles.subjectImage}/>
-        <TouchableOpacity style={styles.markAttendanceButton} onPress={() => { /* TODO: Handle mark attendance */ }}>
-          <Text style={styles.markAttendanceButtonText}>Mark Attendance</Text>
+
+        <View style={styles.infoSection}>
+          <Text style={styles.infoText}>Course: {subject?.course || 'Course'}</Text>
+          <Text style={styles.infoText}>Semester: {subject?.semester || 'Semester'}</Text>
+          <Text style={styles.infoText}>Status: {subject?.is_active ? 'Active' : 'Inactive'}</Text>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.markAttendanceButton, markingAttendance && styles.disabledButton]}
+          onPress={handleMarkAttendance}
+          disabled={markingAttendance}
+        >
+          <Text style={styles.markAttendanceButtonText}>
+            {markingAttendance ? 'Loading...' : 'Mark Attendance'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -42,10 +107,7 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     shadowColor: "rgba(0, 0, 0, 0.65)",
-    shadowOffset: {
-      width: 2,
-      height: 4
-    },
+    shadowOffset: { width: 2, height: 4 },
     shadowRadius: 4,
     elevation: 4,
     shadowOpacity: 3,
@@ -55,38 +117,46 @@ const styles = StyleSheet.create({
   },
   subjectName: {
     fontSize: 32,
-    marginTop: 50,
-    marginBottom: 50,
+    marginTop: 30,
+    marginBottom: 20,
+    fontWeight: '400',
+    color: '#000',
+    fontFamily: "ClashDisplay",
+  },
+  subjectId: {
+    fontSize: 24,
+    marginBottom: 10,
     fontWeight: '400',
     color: '#000',
     fontFamily: "ClashDisplay",
   },
   subjectImage: {
-    marginTop: 50,
-    marginBottom: 50,
+    marginTop: 30,
+    marginBottom: 20,
     height: 120,
     width: 200,
   },
-  subjectId: {
-    fontSize: 24,
-    marginBottom: 60,
+  infoSection: {
+    marginVertical: 20,
+    alignItems: 'center',
+  },
+  infoText: {
+    fontSize: 18,
+    marginBottom: 5,
     fontWeight: '400',
     color: '#000',
     fontFamily: "ClashDisplay",
   },
   markAttendanceButton: {
-    backgroundColor: '#d3d3c9',
+    backgroundColor: '#4a7c59',
     borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 30,
+    paddingVertical: 15,
+    paddingHorizontal: 40,
     borderStyle: "solid",
     borderColor: "#000",
     borderWidth: 1,
     shadowColor: "rgba(0, 0, 0, 0.65)",
-    shadowOffset: {
-      width: 2,
-      height: 4
-    },
+    shadowOffset: { width: 2, height: 4 },
     shadowRadius: 4,
     elevation: 4,
     shadowOpacity: 3,
@@ -96,5 +166,8 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#000',
     fontFamily: "ClashDisplay",
+  },
+  disabledButton: {
+    backgroundColor: '#cccccc',
   },
 });

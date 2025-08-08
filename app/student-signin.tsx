@@ -8,16 +8,74 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { supabase } from "../utils/supabase";
 
 export default function StudentSigninScreen() {
   const [name, setName] = useState("");
   const [course, setCourse] = useState("");
   const [sem, setSem] = useState("");
   const [rollNo, setRollNo] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
+
+  const handleStudentSignIn = async () => {
+    if (!name || !course || !sem || !rollNo) {
+      Alert.alert("Error", "Please fill all fields");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Check if student exists
+      const { data: existingStudent, error: checkError } = await supabase
+        .from("students")
+        .select("*")
+        .eq("roll", parseInt(rollNo))
+        .eq("course", course)
+        .single();
+
+      if (checkError && checkError.code !== "PGRST116") {
+        throw checkError;
+      }
+
+      if (existingStudent) {
+        // Student exists, navigate to subjects
+        router.push({
+          pathname: "/subjects-students",
+          params: { studentId: existingStudent.id, course, sem }
+        });
+      } else {
+        // Create new student
+        const { data: newStudent, error: insertError } = await supabase
+          .from("students")
+          .insert({
+            username: name,
+            course,
+            sem: parseInt(sem),
+            roll: parseInt(rollNo),
+            password: "default123" // Default password for new students
+          })
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+
+        Alert.alert("Success", "Student profile created successfully");
+        router.push({
+          pathname: "/subjects-students",
+          params: { studentId: newStudent.id, course, sem }
+        });
+      }
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to sign in");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -42,9 +100,20 @@ export default function StudentSigninScreen() {
           dropdownIconColor="#555"
         >
           <Picker.Item label="Enter Course" value="" />
-          <Picker.Item label="Computer Science" value="cs" />
-          <Picker.Item label="Mechanical" value="mech" />
-          <Picker.Item label="Electrical" value="ee" />
+          <Picker.Item label="Diploma In Administration Services" value="diploma-administration-services" />
+          <Picker.Item label="Diploma In Apparel Manufacture and Design" value="diploma-apparel-manufacture-design" />
+          <Picker.Item label="Diploma In Electronics" value="diploma-electronics" />
+          <Picker.Item label="Diploma In Food Technology" value="diploma-food-technology" />
+          <Picker.Item label="Diploma In Interior Design" value="diploma-interior-design" />
+          <Picker.Item label="Diploma In Medical Laboratory Technology" value="diploma-medical-lab-tech" />
+          <Picker.Item label="Diploma In Ophthalmic Technology" value="diploma-ophthalmic-tech" />
+          <Picker.Item label="Diploma In Pharmacy" value="diploma-pharmacy" />
+          <Picker.Item label="Diploma In Jewellery Design & Manufacture" value="diploma-jewellery-design" />
+          <Picker.Item label="B.Voc In Optometry" value="bvoc-optometry" />
+          <Picker.Item label="B.Voc In Fashion Design" value="bvoc-fashion-design" />
+          <Picker.Item label="B.Voc In Food Processing Technology" value="bvoc-food-processing" />
+          <Picker.Item label="B.Voc In Interior Design" value="bvoc-interior-design" />
+          <Picker.Item label="B.Voc In Jewellery Design" value="bvoc-jewellery-design" />
         </Picker>
       </View>
 
@@ -76,10 +145,13 @@ export default function StudentSigninScreen() {
       />
 
       <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("/subjects-students")}
+        style={[styles.button, loading && { opacity: 0.7 }]}
+        onPress={handleStudentSignIn}
+        disabled={loading}
       >
-        <Text style={styles.buttonText}>Continue</Text>
+        <Text style={styles.buttonText}>
+          {loading ? "Processing..." : "Continue"}
+        </Text>
       </TouchableOpacity>
     </View>
   );

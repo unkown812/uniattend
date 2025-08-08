@@ -1,53 +1,167 @@
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { useSubjects } from '../hooks/useSubjects';
+import { useAttendance } from '../hooks/useAttendance';
+import { Subject } from '../types/database';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const subjects = [
-  { id: '1', name: 'DSD', status: 'red' },
-  { id: '2', name: 'IOT', status: 'green' },
-  { id: '3', name: 'EVS', status: 'green' },
-];
-
-export default function SubjectsScreen() {
+export default function TeacherSubjectsScreen() {
+  const { user } = useAuth();
   const router = useRouter();
-  
-  const renderItem = ({ item }: { item: { id: string; name: string; status: string } }) => (
-    <TouchableOpacity 
-      style={styles.subjectItem} 
-      onPress={() => router.push(`/subject-detail?subjectId=${item.id}&subjectName=${item.name}`)}
-    >
-      <Text style={styles.subjectText}>{item.name}</Text>
-      <View
-        style={[
-          styles.statusIndicator,
-          { backgroundColor: item.status === 'green' ? '#4caf50' : '#f44336' },
-        ]}
-      />
-    </TouchableOpacity>
-  );
+  const { subjects, loading, error, fetchSubjects } = useSubjects();
+  const { getAttendanceStats } = useAttendance();
+  const [subjectStats, setSubjectStats] = useState<Record<number, any>>({});
+
+  // Helper function to get semester safely
+  const getSemester = (user: any) => {
+    if ('sem' in user) return user.sem;
+    if ('semester' in user) return user.semester;
+    return null;
+  };
+
+  useEffect(() => {
+    if (user && user.course) {
+      const semester = getSemester(user);
+      if (semester) {
+        fetchSubjects(user.course, semester);
+      }
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (subjects.length > 0 && user) {
+      loadSubjectStats();
+    }
+  }, [subjects, user]);
+
+  const loadSubjectStats = async () => {
+    if (!user) return;
+    
+    const semester = getSemester(user);
+    if (!semester) return;
+    
+    const stats: Record<number, any> = {};
+    for (const subject of subjects) {
+      try {
+        const stat = await getAttendanceStats(subject.id, user.course, semester);
+        stats[subject.id] = stat;
+      } catch (error) {
+        console.error('Error loading stats for subject:', subject.id, error);
+      }
+    }
+    setSubjectStats(stats);
+  };
+
+  const renderSubject = ({ item }: { item: Subject }) => {
+    const stats = subjectStats[item.id];
+    const attendanceRate = stats && stats.total > 0 
+      ? Math.round((stats.present / stats.total) * 100) 
+      : 0;
+
+    return (
+      <TouchableOpacity
+        style={styles.subjectCard}
+        onPress={() => router.push(`/subject-detail?subjectId=${item.id}`)}
+      >
+        <View style={styles.subjectHeader}>
+          <Text style={styles.subjectName}>{item.name}</Text>
+          <Text style={styles.subjectCode}>{item.code}</Text>
+        </View>
+        
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Attendance Rate</Text>
+            <Text style={[styles.statValue, { color: attendanceRate >= 75 ? '#4caf50' : '#f44336' }]}>
+              {attendanceRate}%
+            </Text>
+          </View>
+          
+          {stats && (
+            <>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Total Classes</Text>
+                <Text style={styles.statValue}>{stats.total}</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Present</Text>
+                <Text style={[styles.statValue, { color: '#4caf50' }]}>{stats.present}</Text>
+              </View>
+            </>
+          )}
+        </View>
+
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push(`/subject-mark-attendance?subjectId=${item.id}`)}
+          >
+            <MaterialIcons name="check-circle" size={20} color="#fff" />
+            <Text style={styles.actionText}>Mark Attendance</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.actionButton, styles.secondaryButton]}
+            onPress={() => router.push(`/subject-detail?subjectId=${item.id}`)}
+          >
+            <MaterialIcons name="info" size={20} color="#4a7c59" />
+            <Text style={[styles.actionText, styles.secondaryText]}>Details</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#4a7c59" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <View>
-          <Text style={styles.title}>Subjects</Text>
-          <Text style={styles.subtitle}>List of all subjects</Text>
-        </View>
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.profileIcon}>
-            <MaterialIcons name="person" size={24} color="#004d40" />
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.title}>My Subjects</Text>
+            <Text style={styles.subtitle}>
+              {user?.course} 
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => router.push('/add-subject')}
+          >
+            <MaterialIcons name="add" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
+
       <FlatList
         data={subjects}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        renderItem={renderSubject}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
       />
-      <TouchableOpacity style={styles.addButton} onPress={() => {router.push('/add-subject') }}>
-        <Text style={styles.addButtonText}>Add Subject</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -55,101 +169,123 @@ export default function SubjectsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff9f0',
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: '#f5f5f5',
   },
-  headerRow: {
-    marginTop: 50,
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  exportButton: {
-    backgroundColor: '#a9cbb7',
-    borderRadius: 12,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: '#000',
-    fontFamily: "ClashDisplay",
-    fontWeight: "400",
-  },
-  exportButtonText: {
-    fontSize: 16,
-    color: '#000',
-    fontFamily: "ClashDisplay",
-  },
-  profileIcon: {
-    backgroundColor: '#a9cbb7',
-    borderRadius: 12,
-    padding: 4,
   },
   title: {
-    fontSize: 50,
-    fontWeight: '400',
-    color: '#000',
-    fontFamily: "ClashDisplay",
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
   },
   subtitle: {
-    fontSize: 24,
-    color: '#555',
-    marginBottom: 20,
-    fontWeight: '400',
-    fontFamily: "ClashDisplay",
+    fontSize: 16,
+    color: '#666',
   },
   listContainer: {
-    paddingBottom: 20,
+    padding: 16,
   },
-  subjectItem: {
-    backgroundColor: '#a9cbb7',
-    borderRadius: 20,
-    paddingVertical: 40,
-    paddingHorizontal: 30,
-    marginBottom: 15,
+  subjectCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  subjectHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: "rgba(0, 0, 0, 0.65)",
-    shadowOffset: {
-      width: 2,
-      height: 4
-    },
-    shadowRadius: 4,
-    elevation: 4,
-    shadowOpacity: 3,
-    borderStyle: "solid",
-    borderColor: "#000",
-    borderWidth: 1,
+    marginBottom: 12,
   },
-  subjectText: {
-    fontSize: 20,
-    color: '#000',
-    fontWeight: 'regular',
-    fontFamily: "ClashDisplay",
+  subjectName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    flex: 1,
   },
-  statusIndicator: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+  subjectCode: {
+    fontSize: 14,
+    color: '#666',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4a7c59',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    gap: 4,
+  },
+  secondaryButton: {
+    backgroundColor: '#e8f5e8',
+  },
+  actionText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  secondaryText: {
+    color: '#4a7c59',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#f44336',
   },
   addButton: {
     backgroundColor: '#4a7c59',
-    borderRadius: 20,
-    paddingVertical: 25,
-    marginBottom: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  addButtonText: {
-    color: '#000',
-    fontSize: 18,
-    fontWeight: '400',
-    fontFamily: "ClashDisplay",
-  },
-
 });

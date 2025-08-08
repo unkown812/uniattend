@@ -1,31 +1,53 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const subjects = [
-  { id: '1', name: 'DSD', status: 'red' },
-  { id: '2', name: 'IOT', status: 'green' },
-  { id: '3', name: 'EVS', status: 'green' },
-];
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useEffect } from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { useSubjects } from '../hooks/useSubjects';
 
 export default function SubjectsScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const { subjects, loading, error, fetchSubjects } = useSubjects();
   
-  const renderItem = ({ item }: { item: { id: string; name: string; status: string } }) => (
+  const course = params.course as string;
+  const semester = parseInt(params.sem as string);
+
+  useEffect(() => {
+    if (course && semester) {
+      fetchSubjects(course, semester);
+    }
+  }, [course, semester]);
+
+  const renderItem = ({ item }: { item: { id: number; name: string; code: string; is_active: boolean } }) => (
     <TouchableOpacity 
       style={styles.subjectItem} 
-      onPress={() => router.push(`/subject-mark-attendance?subjectId=${item.id}&subjectName=${item.name}`)}
+      onPress={() => router.push(`/subject-mark-attendance?subjectId=${item.id}&subjectName=${item.name}&studentId=${params.studentId}`)}
     >
       <Text style={styles.subjectText}>{item.name}</Text>
       <View
         style={[
           styles.statusIndicator,
-          { backgroundColor: item.status === 'green' ? '#4caf50' : '#f44336' },
+          { backgroundColor: item.is_active ? '#4caf50' : '#f44336' },
         ]}
       />
     </TouchableOpacity>
   );
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#4a7c59" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -41,8 +63,11 @@ export default function SubjectsScreen() {
       <FlatList
         data={subjects}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No subjects found for {course} - Semester {semester}</Text>
+        }
       />
     </View>
   );
@@ -114,29 +139,17 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
   },
-  addButton: {
-    backgroundColor: "#bfcbb8",
-    borderRadius: 20,
-    paddingVertical: 25,
-    marginBottom: 20,
-    alignItems: 'center',
-    shadowColor: "#bfcbb8",
-    shadowOffset: {
-      width: 0,
-      height: 4
-    },
-    shadowRadius: 4,
-    elevation: 4,
-    shadowOpacity: 1,
-    height: 82,
-    borderColor:'#000',
-    borderWidth: 1,
-    borderStyle: "solid"
-  },
-  addButtonText: {
-    color: '#000',
+  emptyText: {
     fontSize: 18,
-    fontWeight: '400',
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 50,
+    fontFamily: "ClashDisplay",
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#f44336',
+    textAlign: 'center',
     fontFamily: "ClashDisplay",
   },
 });

@@ -1,19 +1,54 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
-import React, { useState } from 'react';
-const students = [
-  { id: '1', name: 'Arpit Salunkhe', roll: '01', sem: '5', status: 'green' },
-  { id: '2', name: 'Adhya Shukla', roll: '01', sem: '5', status: 'red' },
-  { id: '3', name: 'Nasha Talwar', roll: '01', sem: '5', status: 'white' },
-];
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, Modal, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../utils/supabase';
+import { Student } from '../types/database';
+
+interface StudentWithStatus extends Student {
+  status: 'green' | 'red' | 'white';
+}
 
 export default function StudentsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
+  const [students, setStudents] = useState<StudentWithStatus[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const renderItem = ({ item }: { item: { id: string; name: string; roll: string; sem: string; status: string } }) => (
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('students')
+        .select('*')
+        .order('roll', { ascending: true });
+
+      if (error) {
+        throw error;
+      }
+
+      // Map database students to UI format with status
+      const studentsWithStatus = data.map(student => ({
+        ...student,
+        status: 'white' as 'green' | 'red' | 'white' // Default status, can be updated based on attendance
+      }));
+
+      setStudents(studentsWithStatus);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch students');
+      console.error('Error fetching students:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderItem = ({ item }: { item: StudentWithStatus }) => (
     <TouchableOpacity style={styles.studentItem}>
       <View>
-        <Text style={styles.studentName}>{item.name}</Text>
-        <Text style={styles.studentDetails}>Roll: {item.roll}   Sem: {item.sem}</Text>
+        <Text style={styles.studentName}>{item.username}</Text>
+        <Text style={styles.studentDetails}>Roll: {item.roll.toString().padStart(2, '0')}   Sem: {item.sem}</Text>
       </View>
       <View
         style={[
@@ -32,7 +67,7 @@ export default function StudentsScreen() {
       <FlatList
         data={students}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
       />
 

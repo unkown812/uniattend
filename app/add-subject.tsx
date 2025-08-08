@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,21 +8,99 @@ import {
   Image,
   ScrollView,
   Platform,
+  Alert,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../utils/supabase';
+import { useRouter } from 'expo-router';
 
 export default function AddSubjectScreen() {
+  const { user } = useAuth();
+  const router = useRouter();
   const [subjectName, setSubjectName] = useState('');
-  const [subjectID, setSubjectID] = useState('');
+  const [subjectCode, setSubjectCode] = useState('');
   const [course, setCourse] = useState('');
   const [semester, setSemester] = useState('');
+  const [courses, setCourses] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const courses = ['Course 1', 'Course 2', 'Course 3'];
-  const semesters = ['1', '2', '3', '4', '5', '6', '7', '8'];
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
-  const onAddPress = () => {
-    // TODO: Handle add subject logic
-    console.log('Add pressed', { subjectName, subjectID, course, semester });
+  const fetchCourses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('name')
+        .order('name');
+      
+      if (error) throw error;
+      
+      if (data) {
+        setCourses(data.map(c => c.name));
+      }
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      Alert.alert('Error', 'Failed to load courses');
+    }
+  };
+
+  const onAddPress = async () => {
+    if (!subjectName.trim() || !subjectCode.trim() || !course || !semester) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Check if subject already exists
+      const { data: existingSubject } = await supabase
+        .from('subjects')
+        .select('id')
+        .eq('code', subjectCode.toUpperCase())
+        .single();
+
+      if (existingSubject) {
+        Alert.alert('Error', 'Subject with this code already exists');
+        setLoading(false);
+        return;
+      }
+
+      // Insert new subject
+      const { data, error } = await supabase
+        .from('subjects')
+        .insert({
+          name: subjectName.trim(),
+          code: subjectCode.toUpperCase(),
+          course: course,
+          semester: parseInt(semester),
+          teacher_id: user?.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      Alert.alert(
+        'Success',
+        'Subject added successfully',
+        [
+          {
+            text: 'OK',
+            onPress: () => router.back(),
+          },
+        ]
+      );
+
+    } catch (error) {
+      console.error('Error adding subject:', error);
+      Alert.alert('Error', 'Failed to add subject');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,10 +123,11 @@ export default function AddSubjectScreen() {
 
         <TextInput
           style={styles.input}
-          placeholder="Enter Subject ID"
+          placeholder="Enter Subject Code (e.g., CS101)"
           placeholderTextColor="#4a5a4a"
-          value={subjectID}
-          onChangeText={setSubjectID}
+          value={subjectCode}
+          onChangeText={setSubjectCode}
+          autoCapitalize="characters"
         />
 
         <View style={styles.pickerContainer}>
@@ -58,7 +137,7 @@ export default function AddSubjectScreen() {
             style={styles.picker}
             dropdownIconColor="#4a5a4a"
           >
-            <Picker.Item label="Enter Course" value="" color="#4a5a4a" />
+            <Picker.Item label="Select Course" value="" color="#4a5a4a" />
             {courses.map((c) => (
               <Picker.Item key={c} label={c} value={c} />
             ))}
@@ -72,15 +151,21 @@ export default function AddSubjectScreen() {
             style={styles.picker}
             dropdownIconColor="#4a5a4a"
           >
-            <Picker.Item label="Enter Semester" value="" color="#4a5a4a" />
-            {semesters.map((s) => (
-              <Picker.Item key={s} label={s} value={s} />
+            <Picker.Item label="Select Semester" value="" color="#4a5a4a" />
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+              <Picker.Item key={s} label={`${s}`} value={`${s}`} />
             ))}
           </Picker>
         </View>
 
-        <TouchableOpacity style={styles.addButton} onPress={onAddPress}>
-          <Text style={styles.addButtonText}>Add</Text>
+        <TouchableOpacity 
+          style={[styles.addButton, loading && styles.disabledButton]} 
+          onPress={onAddPress}
+          disabled={loading}
+        >
+          <Text style={styles.addButtonText}>
+            {loading ? 'Adding...' : 'Add Subject'}
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -153,6 +238,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 4,
     elevation: 4,
+  },
+  disabledButton: {
+    backgroundColor: '#a9a9a9',
   },
   addButtonText: {
     fontFamily: 'ClashDisplay',
