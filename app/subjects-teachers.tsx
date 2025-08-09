@@ -22,6 +22,22 @@ export default function TeacherSubjectsScreen() {
   const [subjectStats, setSubjectStats] = useState<Record<number, any>>({});
 
   // Helper function to get semester safely
+
+  const renderItem = ({ item }: { item: { id: string; name: string; status: string } }) => (
+    <TouchableOpacity
+      style={styles.subjectItem}
+      onPress={() => router.push(`/subject-detail?subjectId=${item.id}&subjectName=${item.name}`)}
+    >
+      <Text style={styles.subjectText}>{item.name}</Text>
+      <View
+        style={[
+          styles.statusIndicator,
+          { backgroundColor: item.status === 'green' ? '#4caf50' : '#f44336' },
+        ]}
+      />
+    </TouchableOpacity>
+  );
+
   const getSemester = (user: any) => {
     if ('sem' in user) return user.sem;
     if ('semester' in user) return user.semester;
@@ -138,30 +154,26 @@ export default function TeacherSubjectsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View>
-            <Text style={styles.title}>My Subjects</Text>
-            <Text style={styles.subtitle}>
-              {user?.course} 
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => router.push('/add-subject')}
-          >
-            <MaterialIcons name="add" size={24} color="#fff" />
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.title}>Subjects</Text>
+          <Text style={styles.subtitle}>List of all subjects</Text>
+        </View>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.profileIcon}>
+            <MaterialIcons name="person" size={24} color="#004d40" />
           </TouchableOpacity>
         </View>
       </View>
-
       <FlatList
         data={subjects}
-        renderItem={renderSubject}
-        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
       />
+      <TouchableOpacity style={styles.addButton} onPress={() => { router.push('/add-subject') }}>
+        <Text style={styles.addButtonText}>Add Subject</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -170,12 +182,106 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    padding:10
+  },
+  headerRow: {
+    marginTop: 50,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
+  },
+  exportButton: {
+    backgroundColor: '#a9cbb7',
+    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#000',
+    fontFamily: "ClashDisplay",
+    fontWeight: "400",
+  },
+  exportButtonText: {
+    fontSize: 16,
+    color: '#000',
+    fontFamily: "ClashDisplay",
+  },
+  profileIcon: {
+    backgroundColor: '#a9cbb7',
+    borderRadius: 12,
+    padding: 4,
+  },
+  title: {
+    fontSize: 50,
+    fontWeight: '400',
+    color: '#000',
+    fontFamily: "ClashDisplay",
+  },
+  subtitle: {
+    fontSize: 24,
+    color: '#555',
+    marginBottom: 20,
+    fontWeight: '400',
+    fontFamily: "ClashDisplay",
+  },
+
+  listContainer: {
+    paddingBottom: 20,
+  },
+  subjectItem: {
+    backgroundColor: '#a9cbb7',
+    borderRadius: 20,
+    paddingVertical: 40,
+    paddingHorizontal: 30,
+    marginBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    shadowColor: "rgba(0, 0, 0, 0.65)",
+    shadowOffset: {
+      width: 2,
+      height: 4
+    },
+    shadowRadius: 4,
+    elevation: 4,
+    shadowOpacity: 3,
+    borderStyle: "solid",
+    borderColor: "#000",
+    borderWidth: 1,
+  },
+  subjectText: {
+    fontSize: 20,
+    color: '#000',
+    fontWeight: 'regular',
+    fontFamily: "ClashDisplay",
+  },
+  statusIndicator: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
+  addButton: {
+    backgroundColor: '#4a7c59',
+    borderRadius: 20,
+    paddingVertical: 25,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: '#000',
+    fontSize: 18,
+    fontWeight: '400',
+    fontFamily: "ClashDisplay",
   },
   header: {
     backgroundColor: '#fff',
@@ -187,19 +293,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-  },
-  listContainer: {
-    padding: 16,
   },
   subjectCard: {
     backgroundColor: '#fff',
@@ -274,18 +367,5 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
     color: '#f44336',
-  },
-  addButton: {
-    backgroundColor: '#4a7c59',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
   },
 });
