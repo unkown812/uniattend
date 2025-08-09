@@ -17,7 +17,6 @@ export default function TeacherSigninScreen() {
 
     setLoading(true);
     try {
-      // Query the teachers table for authentication
       const { data, error } = await supabase
         .from('teachers')
         .select('*')
@@ -30,7 +29,6 @@ export default function TeacherSigninScreen() {
       }
 
       if (data) {
-        // Successful login
         Alert.alert('Success', 'Login successful!');
         router.push('/subjects-teachers');
       } else {
