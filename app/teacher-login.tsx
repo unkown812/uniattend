@@ -28,7 +28,6 @@ export default function TeacherLoginScreen() {
         semester: parseInt(semester),
       });
 
-      // On successful login, navigate to teacher dashboard
       router.replace('/subjects-teachers');
     } catch (error) {
       Alert.alert('Login Failed', error instanceof Error ? error.message : 'Invalid credentials');
@@ -99,8 +98,8 @@ export default function TeacherLoginScreen() {
           <Text style={styles.buttonText}>Continue</Text>
         )}
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/teacher-login')}>
-        <Text style={styles.newHereText}>New Here ?</Text>
+      <TouchableOpacity onPress={() => router.push('/teacher-signin')}>
+        <Text style={styles.newHereText}>Already User </Text>
       </TouchableOpacity>
     </View>
   );
