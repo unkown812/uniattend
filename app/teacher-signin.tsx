@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 50,
-    marginTop: 100,
+    marginTop: 20,
   },
   disabledButton: {
     backgroundColor: '#cccccc',

@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, TextInput, Alert, ActivityIndicator, Platform } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useAuth } from '../context/AuthContext';
 import { COURSES, SEMESTERS } from '../types/database';
 
@@ -26,7 +27,7 @@ export default function TeacherLoginScreen() {
         course,
         semester: parseInt(semester),
       });
-      
+
       // On successful login, navigate to teacher dashboard
       router.replace('/subjects-teachers');
     } catch (error) {
@@ -58,41 +59,37 @@ export default function TeacherLoginScreen() {
       />
 
       <View style={styles.pickerContainer}>
-        <Text style={styles.pickerLabel}>Select Course</Text>
         <View style={styles.pickerWrapper}>
-          {COURSES.map((courseOption) => (
-            <TouchableOpacity
-              key={courseOption}
-              style={[styles.pickerOption, course === courseOption && styles.pickerOptionSelected]}
-              onPress={() => setCourse(courseOption)}
-            >
-              <Text style={[styles.pickerOptionText, course === courseOption && styles.pickerOptionTextSelected]}>
-                {courseOption}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          <Picker
+            selectedValue={course}
+            onValueChange={(itemValue) => setCourse(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Select Course" value="" />
+            {COURSES.map((courseOption) => (
+              <Picker.Item key={courseOption} label={courseOption} value={courseOption} />
+            ))}
+          </Picker>
         </View>
       </View>
 
       <View style={styles.pickerContainer}>
-        <Text style={styles.pickerLabel}>Select Semester</Text>
         <View style={styles.pickerWrapper}>
-          {SEMESTERS.map((semesterOption) => (
-            <TouchableOpacity
-              key={semesterOption}
-              style={[styles.pickerOption, semester === semesterOption.toString() && styles.pickerOptionSelected]}
-              onPress={() => setSemester(semesterOption.toString())}
-            >
-              <Text style={[styles.pickerOptionText, semester === semesterOption.toString() && styles.pickerOptionTextSelected]}>
-                {semesterOption}
-              </Text>
-            </TouchableOpacity>
-          ))}
+          <Picker
+            selectedValue={semester}
+            onValueChange={(itemValue) => setSemester(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Select Semester" value="" />
+            {SEMESTERS.map((semesterOption) => (
+              <Picker.Item key={semesterOption} label={semesterOption.toString()} value={semesterOption.toString()} />
+            ))}
+          </Picker>
         </View>
       </View>
 
-      <TouchableOpacity 
-        style={[styles.button, loading && styles.buttonDisabled]} 
+      <TouchableOpacity
+        style={[styles.button, loading && styles.buttonDisabled]}
         onPress={handleTeacherLogin}
         disabled={loading}
       >
@@ -101,6 +98,9 @@ export default function TeacherLoginScreen() {
         ) : (
           <Text style={styles.buttonText}>Continue</Text>
         )}
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('/teacher-login')}>
+        <Text style={styles.newHereText}>New Here ?</Text>
       </TouchableOpacity>
     </View>
   );
@@ -124,6 +124,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     marginBottom: 20,
+    fontWeight: "100",
+    fontFamily: "ClashDisplay",
   },
   input: {
     width: '90%',
@@ -146,8 +148,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 50,
-    marginTop: 100,
+    marginBottom: 30,
+    marginTop: 30,
   },
   buttonDisabled: {
     backgroundColor: '#cccccc',
@@ -159,18 +161,32 @@ const styles = StyleSheet.create({
     fontFamily: "ClashDisplay",
   },
   pickerContainer: {
-    width: '90%',
-    marginBottom: 20,
-  },
-  pickerLabel: {
+    width: "90%",
+    height: Platform.OS === "android" ? 50 : undefined,
+    backgroundColor: "rgba(0, 64, 48, 0.25)",
+    marginVertical: 8,
+    justifyContent: "center",
     fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#333',
+    fontWeight: "100",
+    fontFamily: "ClashDisplay",
+    shadowColor: "rgba(0, 0, 0, 0.25)",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowRadius: 4,
+    elevation: 4,
+    shadowOpacity: 1,
+    borderRadius: 30,
+    borderStyle: "solid",
+    borderColor: "#000",
+    borderWidth: 1,
   },
   pickerWrapper: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    fontWeight: "100",
+    fontFamily: "ClashDisplay",
     gap: 8,
   },
   pickerOption: {
@@ -191,5 +207,20 @@ const styles = StyleSheet.create({
   },
   pickerOptionTextSelected: {
     color: '#fff',
+  },
+  picker: {
+    width: "100%",
+    color: "#000",
+    fontWeight: "100",
+    fontFamily: "ClashDisplay",
+    fontSize: 16,
+    paddingHorizontal: 15,
+  },
+  newHereText: {
+    color: "rgba(0, 0, 0, 0.5)",
+    fontSize: 16,
+    textDecorationLine: 'underline',
+    fontWeight: '100',
+    fontFamily: "ClashDisplay",
   },
 });
