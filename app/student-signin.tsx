@@ -15,6 +15,7 @@ import { supabase } from "../utils/supabase";
 
 export default function StudentSigninScreen() {
   const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [course, setCourse] = useState("");
   const [sem, setSem] = useState("");
   const [rollNo, setRollNo] = useState("");
@@ -23,55 +24,40 @@ export default function StudentSigninScreen() {
   const router = useRouter();
 
   const handleStudentSignIn = async () => {
-    if (!name || !course || !sem || !rollNo) {
+    if (!name || !password) {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
 
     setLoading(true);
     try {
-      // Check if student exists
-      const { data: existingStudent, error: checkError } = await supabase
+      // Cross-check input data with database
+      const { data: student, error } = await supabase
         .from("students")
-        .select("id")
+        .select("id, username, password")
         .eq("roll", parseInt(rollNo))
         .eq("course", course)
+        .eq("sem", parseInt(sem))
+        .eq("username", name)
         .single();
 
-      if (checkError && checkError.code !== "PGRST116") {
-        throw checkError;
-      }
-
-      if (existingStudent) {
-        // Student exists, navigate directly
-        router.push({
-          pathname: "/subjects-students",
-          params: { studentId: existingStudent.id, course, sem }
-        });
+      if (error) {
+        if (error.code === "PGRST116") {
+          Alert.alert("Error", "Student not found. Please check your details.");
+        } else {
+          throw error;
+        }
         return;
       }
 
-      // Insert new student - matching exact database fields
-      const { data: newStudent, error: insertError } = await supabase
-        .from("students")
-        .insert({
-          username: name,
-          course,
-          sem: parseInt(sem),
-          roll: parseInt(rollNo),
-          password: "default123" // Default password for new students
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        throw insertError;
+      if (student.password !== password) {
+        Alert.alert("Error", "Invalid password. Please try again.");
+        return;
       }
 
-      Alert.alert("Success", "Student profile created successfully");
       router.push({
         pathname: "/subjects-students",
-        params: { id: newStudent.id, course, sem }
+        params: { studentId: student.id, course, sem }
       });
 
     } catch (error: any) {
@@ -96,6 +82,14 @@ export default function StudentSigninScreen() {
         placeholder="Enter Name"
         value={name}
         onChangeText={setName}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Enter Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
       />
 
       <View style={styles.pickerContainer}>
@@ -176,8 +170,8 @@ const styles = StyleSheet.create({
   },
   image: {
     marginTop: 10,
-    width: 340,
-    height: 340,
+    width: 280,
+    height: 280,
     borderRadius: 70,
     marginVertical: 30,
   },

@@ -19,7 +19,7 @@ export default function StudentSigninScreen() {
   const [sem, setSem] = useState("");
   const [rollNo, setRollNo] = useState("");
   const [loading, setLoading] = useState(false);
-    const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('');
 
   const router = useRouter();
 
@@ -60,7 +60,7 @@ export default function StudentSigninScreen() {
           course,
           sem: parseInt(sem),
           roll: parseInt(rollNo),
-          password: "default123"
+          password: password
         })
         .select()
         .single();
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     marginBottom: 20,
-    marginTop: 120,
+    marginTop: 80,
     fontWeight: "100",
     fontFamily: "ClashDisplay",
   },
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 50,
-    marginTop: 50,
+    marginTop: 30,
   },
   buttonText: {
     color: "#000",

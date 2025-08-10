@@ -23,7 +23,7 @@ export default function TeacherSubjectsScreen() {
 
   // Helper function to get semester safely
 
-  const renderItem = ({ item }: { item: { id: string; name: string; status: string } }) => (
+  const renderItem = ({ item }: { item: { id: string; name: string; is_active: string } }) => (
     <TouchableOpacity
       style={styles.subjectItem}
       onPress={() => router.push(`/subject-detail?subjectId=${item.id}&subjectName=${item.name}`)}
@@ -32,7 +32,7 @@ export default function TeacherSubjectsScreen() {
       <View
         style={[
           styles.statusIndicator,
-          { backgroundColor: item.status === 'green' ? '#4caf50' : '#f44336' },
+          { backgroundColor: item.is_active === 'active' ? '#4caf50' : '#f44336' },
         ]}
       />
     </TouchableOpacity>

@@ -6,7 +6,7 @@ import { Subject } from '../types/database';
 
 export default function SubjectDetailScreen() {
   const { subjectId } = useLocalSearchParams<{ subjectId: string }>();
-  const [subject, setSubject] = useState<Subject | null>(null);
+  const [subject, setSubject] = useState<Subject>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,15 +40,19 @@ export default function SubjectDetailScreen() {
 
   const handleActivate = async () => {
     if (!subject) return;
+    
     try {
+      const newStatus = subject.is_active === 'active' ? 'inactive' : 'active';
       const { error } = await supabase
         .from('subjects')
-        .update({ is_active: !subject.is_active })
+        .update({ is_active: newStatus })
         .eq('id', subjectId);
-        fetchSubject();
-        if (error) {
-          throw error;
-        }
+      
+      if (error) {
+        throw error;
+      }
+      
+      await fetchSubject();
     } catch (err) {
       console.error('Error updating subject status:', err);
       setError('Failed to update subject status');

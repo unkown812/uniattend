@@ -24,7 +24,7 @@ export interface Subject {
   created_at: string;
   name: string;
   code: string;
-  is_active: boolean;
+  is_active: string;
   course: string;
   semester: number;
 }
