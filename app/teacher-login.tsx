@@ -39,7 +39,7 @@ export default function TeacherLoginScreen() {
   return (
     <View style={styles.container}>
       <Image source={require('../assets/images/teacherIllustration.png')} style={styles.image} />
-      <Text style={styles.title}>Teacher Login</Text>
+      <Text style={styles.title}>Register</Text>
 
       <TextInput
         style={styles.input}
@@ -95,7 +95,7 @@ export default function TeacherLoginScreen() {
         {loading ? (
           <ActivityIndicator color="#000" />
         ) : (
-          <Text style={styles.buttonText}>Continue</Text>
+          <Text style={styles.buttonText}>Register</Text>
         )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push('/teacher-signin')}>
@@ -114,14 +114,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    marginTop: 130,
+    marginTop: 100,
     width: 340,
     height: 340,
     borderRadius: 70,
     marginVertical: 30,
   },
   title: {
-    fontSize: 22,
+    fontSize: 32,
     marginBottom: 20,
     fontWeight: "100",
     fontFamily: "ClashDisplay",

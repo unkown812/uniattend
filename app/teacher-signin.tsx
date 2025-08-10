@@ -72,7 +72,7 @@ export default function TeacherSigninScreen() {
         disabled={loading}
       >
         <Text style={styles.buttonText}>
-          {loading ? 'Signing In...' : 'Continue'}
+          {loading ? 'Signing In...' : 'Login'}
         </Text>
       </TouchableOpacity>
 

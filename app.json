@@ -4,7 +4,6 @@
     "slug": "uniattend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "logo": "./assets/images/logo.png",
     "scheme": "uniattend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -16,7 +15,8 @@
         "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#fff9e5ff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.unkown812dev.uniattend"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +37,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c1ac9e1c-07bd-49bd-86cc-14c261f8943f"
+      }
+    },
+    "owner": "unkown812dev"
   }
 }

@@ -77,64 +77,6 @@ export default function TeacherSubjectsScreen() {
     setSubjectStats(stats);
   };
 
-  const renderSubject = ({ item }: { item: Subject }) => {
-    const stats = subjectStats[item.id];
-    const attendanceRate = stats && stats.total > 0 
-      ? Math.round((stats.present / stats.total) * 100) 
-      : 0;
-
-    return (
-      <TouchableOpacity
-        style={styles.subjectCard}
-        onPress={() => router.push(`/subject-detail?subjectId=${item.id}`)}
-      >
-        <View style={styles.subjectHeader}>
-          <Text style={styles.subjectName}>{item.name}</Text>
-          <Text style={styles.subjectCode}>{item.code}</Text>
-        </View>
-        
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Attendance Rate</Text>
-            <Text style={[styles.statValue, { color: attendanceRate >= 75 ? '#4caf50' : '#f44336' }]}>
-              {attendanceRate}%
-            </Text>
-          </View>
-          
-          {stats && (
-            <>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Total Classes</Text>
-                <Text style={styles.statValue}>{stats.total}</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Present</Text>
-                <Text style={[styles.statValue, { color: '#4caf50' }]}>{stats.present}</Text>
-              </View>
-            </>
-          )}
-        </View>
-
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => router.push(`/subject-mark-attendance?subjectId=${item.id}`)}
-          >
-            <MaterialIcons name="check-circle" size={20} color="#fff" />
-            <Text style={styles.actionText}>Mark Attendance</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[styles.actionButton, styles.secondaryButton]}
-            onPress={() => router.push(`/subject-detail?subjectId=${item.id}`)}
-          >
-            <MaterialIcons name="info" size={20} color="#4a7c59" />
-            <Text style={[styles.actionText, styles.secondaryText]}>Details</Text>
-          </TouchableOpacity>
-        </View>
-      </TouchableOpacity>
-    );
-  };
 
   if (loading) {
     return (
@@ -160,7 +102,7 @@ export default function TeacherSubjectsScreen() {
           <Text style={styles.subtitle}>List of all subjects</Text>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.profileIcon}>
+          <TouchableOpacity style={styles.profileIcon} onPress={() => { router.push('/profile-teacher') }}>
             <MaterialIcons name="person" size={24} color="#004d40" />
           </TouchableOpacity>
         </View>

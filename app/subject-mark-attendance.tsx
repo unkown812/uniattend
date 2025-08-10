@@ -44,8 +44,16 @@ export default function SubjectMarkAttendanceScreen() {
 
     setMarkingAttendance(true);
     try {
-      // Navigate to attendance marking screen with subject context
-      router.push(`/subject-mark-attendance?subjectId=${subjectId}&subjectName=${subject.name}`);
+      // Navigate to student selection screen for attendance marking
+      router.push({
+        pathname: '/mark-attendance-students',
+        params: {
+          subjectId: subjectId,
+          subjectName: subject.name,
+          course: subject.course,
+          semester: subject.semester.toString()
+        }
+      });
     } catch (err) {
       console.error('Error navigating to attendance:', err);
       setError('Failed to navigate to attendance marking');

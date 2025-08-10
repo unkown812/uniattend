@@ -40,19 +40,15 @@ export default function SubjectDetailScreen() {
 
   const handleActivate = async () => {
     if (!subject) return;
-
     try {
       const { error } = await supabase
         .from('subjects')
         .update({ is_active: !subject.is_active })
         .eq('id', subjectId);
-
-      if (error) {
-        throw error;
-      }
-
-      // Refresh the subject data
-      fetchSubject();
+        fetchSubject();
+        if (error) {
+          throw error;
+        }
     } catch (err) {
       console.error('Error updating subject status:', err);
       setError('Failed to update subject status');
@@ -92,12 +88,12 @@ export default function SubjectDetailScreen() {
       <View style={styles.card}>
         <Text style={styles.subjectName}>{subject.name}</Text>
         <Text style={styles.subjectCode}>Subject Code: {subject.code}</Text>
-        <Image source={require('../assets/images/Subjects.png')} style={styles.studentListImage}/>
+        <Image source={require('../assets/images/Subjects.png')} style={styles.studentListImage} />
         <TouchableOpacity style={styles.studentListButton} onPress={() => router.push(`/students?subjectId=${subjectId}`)}>
           <Text style={styles.studentListButtonText}>Student   List</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.activateButton, { backgroundColor: subject.is_active ? '#e74c3c' : '#4a7c59' }]} 
+        <TouchableOpacity
+          style={[styles.activateButton, { backgroundColor: subject.is_active ? '#e74c3c' : '#4a7c59' }]}
           onPress={handleActivate}
         >
           <Text style={styles.activateButtonText}>

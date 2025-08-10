@@ -11,13 +11,10 @@ import {
   Alert,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabase';
 import { useRouter } from 'expo-router';
-import { COURSES } from '../types/database';
 
 export default function AddSubjectScreen() {
-  const { user } = useAuth();
   const router = useRouter();
   const [subjectName, setSubjectName] = useState('');
   const [subjectCode, setSubjectCode] = useState('');
@@ -77,8 +74,8 @@ export default function AddSubjectScreen() {
         .insert({
           name: subjectName.trim(),
           code: subjectCode.toUpperCase(),
-          course: course,
           semester: parseInt(semester),
+          // course: course,
           // teacher_id: user?.id,
         })
         .select()
@@ -132,7 +129,7 @@ export default function AddSubjectScreen() {
           autoCapitalize="characters"
         />
 
-        <View style={styles.pickerContainer}>
+        {/* <View style={styles.pickerContainer}>
           <Picker
             selectedValue={course}
             onValueChange={(itemValue) => setCourse(itemValue)}
@@ -144,7 +141,7 @@ export default function AddSubjectScreen() {
               <Picker.Item key={c} label={c} value={c} />
             ))}
           </Picker>
-        </View>
+        </View> */}
 
         <View style={styles.pickerContainer}>
           <Picker
