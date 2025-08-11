@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { supabase } from '../utils/supabase';
 import { Student } from '../types/database';
-
+ 
 export default function MarkAttendanceStudentsScreen() {
   const { subjectId, subjectName, course, semester } = useLocalSearchParams<{
     subjectId: string;
@@ -75,10 +75,8 @@ export default function MarkAttendanceStudentsScreen() {
         subject: subjectName,
         semester: semester,
         course: course,
-        date: today,
-        status: selectedStudents.has(student.id) ? 'present' as const : 'absent' as const,
-        student_id: student.id,
-        subject_id: parseInt(subjectId)
+        // student_id: student.id,
+        // subject_id: parseInt(subjectId)
       }));
 
       const { error } = await supabase
