@@ -20,8 +20,8 @@ export class CSVExportService {
           students!inner(username, roll),
           subjects!inner(name)
         `)
-        .eq('subject_id', subjectId)
         .eq('date', lectureDate)
+        .eq('subject', subjectId)
         .order('students(roll)', { ascending: true });
 
       if (error) throw error;
@@ -53,7 +53,7 @@ export class CSVExportService {
           students!inner(username, roll),
           subjects!inner(name)
         `)
-        .eq('subject_id', subjectId)
+        .eq('subject', subjectId)
         .gte('date', startDate)
         .lte('date', endDate)
         .order('date', { ascending: true })

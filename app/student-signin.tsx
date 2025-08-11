@@ -7,6 +7,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  KeyboardAvoidingView,
   View,
   Alert,
 } from "react-native";
@@ -39,7 +40,7 @@ export default function StudentSigninScreen() {
           course,
           sem: parseInt(sem),
           roll: parseInt(rollNo),
-          password: password
+          password: password,
         })
         .select()
         .single();
@@ -62,12 +63,12 @@ export default function StudentSigninScreen() {
       // Successful login
       router.push({
         pathname: "/subjects-students",
-        params: { studentId: student.id, course, sem }
+        params: { studentId: student.id, course, sem },
       });
-
     } catch (error: any) {
       console.error("Sign in error:", error);
-      const errorMessage = error?.message || error?.details || "Failed to sign in";
+      const errorMessage =
+        error?.message || error?.details || "Failed to sign in";
       Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
@@ -75,93 +76,131 @@ export default function StudentSigninScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
-      <Image
-        source={require("../assets/images/professor.png")}
-        style={styles.image}
-      />
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View style={styles.content}>
+        <Text style={styles.title}>Sign Up</Text>
+        <Image
+          source={require("../assets/images/professor.png")}
+          style={styles.image}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Name"
-        value={name}
-        onChangeText={setName}
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Name"
+          value={name}
+          onChangeText={setName}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={course}
-          onValueChange={(itemValue: string) => setCourse(itemValue)}
-          style={styles.picker}
-          dropdownIconColor="#555"
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={course}
+            onValueChange={(itemValue: string) => setCourse(itemValue)}
+            style={styles.picker}
+            dropdownIconColor="#555"
+          >
+            <Picker.Item label="Enter Course" value="" />
+            <Picker.Item
+              label="Diploma In Administration Services"
+              value="diploma-administration-services"
+            />
+            <Picker.Item
+              label="Diploma In Apparel Manufacture and Design"
+              value="diploma-apparel-manufacture-design"
+            />
+            <Picker.Item
+              label="Diploma In Electronics"
+              value="diploma-electronics"
+            />
+            <Picker.Item
+              label="Diploma In Food Technology"
+              value="diploma-food-technology"
+            />
+            <Picker.Item
+              label="Diploma In Interior Design"
+              value="diploma-interior-design"
+            />
+            <Picker.Item
+              label="Diploma In Medical Laboratory Technology"
+              value="diploma-medical-lab-tech"
+            />
+            <Picker.Item
+              label="Diploma In Ophthalmic Technology"
+              value="diploma-ophthalmic-tech"
+            />
+            <Picker.Item label="Diploma In Pharmacy" value="diploma-pharmacy" />
+            <Picker.Item
+              label="Diploma In Jewellery Design & Manufacture"
+              value="diploma-jewellery-design"
+            />
+            <Picker.Item label="B.Voc In Optometry" value="bvoc-optometry" />
+            <Picker.Item
+              label="B.Voc In Fashion Design"
+              value="bvoc-fashion-design"
+            />
+            <Picker.Item
+              label="B.Voc In Food Processing Technology"
+              value="bvoc-food-processing"
+            />
+            <Picker.Item
+              label="B.Voc In Interior Design"
+              value="bvoc-interior-design"
+            />
+            <Picker.Item
+              label="B.Voc In Jewellery Design"
+              value="bvoc-jewellery-design"
+            />
+          </Picker>
+        </View>
+
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={sem}
+            onValueChange={(itemValue: string) => setSem(itemValue)}
+            style={styles.picker}
+            dropdownIconColor="#555"
+          >
+            <Picker.Item label="Enter Semester" value="" />
+            <Picker.Item label="1" value="1" />
+            <Picker.Item label="2" value="2" />
+            <Picker.Item label="3" value="3" />
+            <Picker.Item label="4" value="4" />
+            <Picker.Item label="5" value="5" />
+            <Picker.Item label="6" value="6" />
+            <Picker.Item label="7" value="7" />
+            <Picker.Item label="8" value="8" />
+          </Picker>
+        </View>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Roll no."
+          value={rollNo}
+          onChangeText={setRollNo}
+          keyboardType="numeric"
+        />
+
+        <TouchableOpacity
+          style={[styles.button, loading && { opacity: 0.7 }]}
+          onPress={handleStudentSignIn}
+          disabled={loading}
         >
-          <Picker.Item label="Enter Course" value="" />
-          <Picker.Item label="Diploma In Administration Services" value="diploma-administration-services" />
-          <Picker.Item label="Diploma In Apparel Manufacture and Design" value="diploma-apparel-manufacture-design" />
-          <Picker.Item label="Diploma In Electronics" value="diploma-electronics" />
-          <Picker.Item label="Diploma In Food Technology" value="diploma-food-technology" />
-          <Picker.Item label="Diploma In Interior Design" value="diploma-interior-design" />
-          <Picker.Item label="Diploma In Medical Laboratory Technology" value="diploma-medical-lab-tech" />
-          <Picker.Item label="Diploma In Ophthalmic Technology" value="diploma-ophthalmic-tech" />
-          <Picker.Item label="Diploma In Pharmacy" value="diploma-pharmacy" />
-          <Picker.Item label="Diploma In Jewellery Design & Manufacture" value="diploma-jewellery-design" />
-          <Picker.Item label="B.Voc In Optometry" value="bvoc-optometry" />
-          <Picker.Item label="B.Voc In Fashion Design" value="bvoc-fashion-design" />
-          <Picker.Item label="B.Voc In Food Processing Technology" value="bvoc-food-processing" />
-          <Picker.Item label="B.Voc In Interior Design" value="bvoc-interior-design" />
-          <Picker.Item label="B.Voc In Jewellery Design" value="bvoc-jewellery-design" />
-        </Picker>
+          <Text style={styles.buttonText}>
+            {loading ? "Processing..." : "Continue"}
+          </Text>
+        </TouchableOpacity>
       </View>
-
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={sem}
-          onValueChange={(itemValue: string) => setSem(itemValue)}
-          style={styles.picker}
-          dropdownIconColor="#555"
-        >
-          <Picker.Item label="Enter Semester" value="" />
-          <Picker.Item label="1" value="1" />
-          <Picker.Item label="2" value="2" />
-          <Picker.Item label="3" value="3" />
-          <Picker.Item label="4" value="4" />
-          <Picker.Item label="5" value="5" />
-          <Picker.Item label="6" value="6" />
-          <Picker.Item label="7" value="7" />
-          <Picker.Item label="8" value="8" />
-        </Picker>
-      </View>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Enter Roll no."
-        value={rollNo}
-        onChangeText={setRollNo}
-        keyboardType="numeric"
-      />
-
-      <TouchableOpacity
-        style={[styles.button, loading && { opacity: 0.7 }]}
-        onPress={handleStudentSignIn}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? "Processing..." : "Continue"}
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/student-login')}>
-        <Text style={styles.newHereText}>Already User </Text>
-      </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -169,9 +208,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff9f0",
+  },
+  content: {
+    flex: 1,
+    backgroundColor: "#fff9f0",
     borderRadius: 20,
     padding: 20,
     alignItems: "center",
+    justifyContent: "center",
   },
   image: {
     marginTop: 10,
@@ -258,8 +302,8 @@ const styles = StyleSheet.create({
   newHereText: {
     color: "rgba(0, 0, 0, 0.5)",
     fontSize: 16,
-    textDecorationLine: 'underline',
-    fontWeight: '100',
+    textDecorationLine: "underline",
+    fontWeight: "100",
     fontFamily: "ClashDisplay",
   },
 });

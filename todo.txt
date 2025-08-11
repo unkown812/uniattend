@@ -1,0 +1,5 @@
+Splash Screen
+Student Login Remove
+Deactivate / Activate
+Profile remove
+exportAttendance

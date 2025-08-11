@@ -5,30 +5,16 @@ import { useAuth } from '../context/AuthContext';
 
 export default function SplashScreen() {
   const router = useRouter();
-  const { user, userType, loading, isFirstLaunch } = useAuth();
+  const { loading } = useAuth();
 
   useEffect(() => {
     if (!loading) {
       const timer = setTimeout(() => {
-        if (isFirstLaunch) {
-          // First time launch - show signup
           router.replace('/login-selection');
-        } else if (user && userType) {
-          // User is logged in - redirect to appropriate subjects
-          if (userType === 'student') {
-            router.replace('/subjects-students');
-          } else if (userType === 'teacher') {
-            router.replace('/subjects-teachers');
-          }
-        } else {
-          // Not first launch but not logged in - show login
-          router.replace('/login-selection');
-        }
-      }, 2000); // Reduced from 4000ms for better UX
-
+      }, 2000); 
       return () => clearTimeout(timer);
     }
-  }, [router, user, userType, loading, isFirstLaunch]);
+  }, [loading]);
 
   return (
     <View style={styles.container}>

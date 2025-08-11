@@ -6,7 +6,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { CSVExportService } from '../utils/csvExport';
 
 interface StudentWithStatus extends Student {
-  status: 'green' | 'red' | 'white';
+  status: 'present' | 'absent';
 }
 
 export default function StudentsScreen() {
@@ -39,7 +39,7 @@ export default function StudentsScreen() {
 
       const studentsWithStatus = data.map(student => ({
         ...student,
-        status: 'white' as 'green' | 'red' | 'white' 
+        status: 'white' as 'green' | 'red' 
       }));
 
       setStudents(studentsWithStatus);
@@ -110,7 +110,7 @@ export default function StudentsScreen() {
       <View
         style={[
           styles.statusIndicator,
-          { backgroundColor: item.status === 'white' ? '#fff' : item.status === 'green' ? '#4caf50' : '#f44336' },
+          { backgroundColor: item.status === 'present' ? '#4caf50' :  '#f44336' },
         ]}
       />
     </TouchableOpacity>

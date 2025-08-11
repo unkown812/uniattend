@@ -1,26 +1,51 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React,{ useEffect } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View, KeyboardAvoidingView, Platform } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginSelectionScreen() {
 
   const router = useRouter();
+    const { user, userType, loading, isFirstLaunch } = useAuth();
+  
+    useEffect(() => {
+      if (!loading) {
+        // if (isFirstLaunch) {
+        //   router.replace('/login-selection');
+        // } else 
+          if (user && userType) {
+          if (userType === 'student') {
+            router.replace('/subjects-students');
+          } else if (userType === 'teacher') {
+            router.replace('/subjects-teachers');
+          }
+        } 
+        // else {
+        //   router.replace('/login-selection');
+        // }
+      }
+    }, [router, user, userType, loading, isFirstLaunch]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Who Are You ?</Text>
-      <Text style={styles.subtitle}>Login to Continue</Text>
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'android' ? 'padding' : 'height'}
+    >
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/teacher-signin')}>
-        <Text style={styles.buttonText}>Teacher</Text>
-        <Image source={require('../assets/images/teacher.png')} style={styles.buttonImage}/>
-      </TouchableOpacity>
+        <Text style={styles.title}>Who Are You ?</Text>
+        <Text style={styles.subtitle}>Login to Continue</Text>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/student-signin')}>
-        <Text style={styles.buttonText}>Student</Text>
-        <Image source={require('../assets/images/mortarboard.png')} style={styles.buttonImage} />
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/teacher-signin')}>
+          <Text style={styles.buttonText}>Teacher</Text>
+          <Image source={require('../assets/images/teacher.png')} style={styles.buttonImage}/>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/student-signin')}>
+          <Text style={styles.buttonText}>Student</Text>
+          <Image source={require('../assets/images/mortarboard.png')} style={styles.buttonImage} />
+        </TouchableOpacity>
+
+    </KeyboardAvoidingView>
   );
 }
 
@@ -28,6 +53,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff9f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    flex: 1,
     borderRadius: 20,
     padding: 20,
     justifyContent: 'center',
