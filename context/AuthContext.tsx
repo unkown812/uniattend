@@ -1,21 +1,26 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { Student, Teacher } from '../types/database';
+import { StorageService } from '../utils/storage';
 
 interface AuthContextType {
   user: Student | Teacher | null;
   userType: 'student' | 'teacher' | null;
   loading: boolean;
+  isFirstLaunch: boolean;
   signIn: (type: 'student' | 'teacher', credentials: any) => Promise<void>;
   signOut: () => Promise<void>;
+  setFirstLaunchComplete: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   userType: null,
   loading: true,
+  isFirstLaunch: true,
   signIn: async () => {},
   signOut: async () => {},
+  setFirstLaunchComplete: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -28,16 +33,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<Student | Teacher | null>(null);
   const [userType, setUserType] = useState<'student' | 'teacher' | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFirstLaunch, setIsFirstLaunch] = useState(true);
 
   useEffect(() => {
-    checkUser();
+    initializeAuth();
   }, []);
 
-  const checkUser = async () => {
+  const initializeAuth = async () => {
     try {
+      const firstLaunch = await StorageService.isFirstLaunch();
+      setIsFirstLaunch(firstLaunch);
+
+      // Check for existing user session
+      const savedUserType = await StorageService.getUserType();
+      const savedUserData = await StorageService.getUserData();
+      
+      if (savedUserType && savedUserData) {
+        setUser(savedUserData);
+        setUserType(savedUserType);
+      }
+      
       setLoading(false);
     } catch (error) {
-      console.error('Error checking user:', error);
+      console.error('Error initializing auth:', error);
       setLoading(false);
     }
   };
@@ -59,6 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         setUser(student);
         setUserType('student');
+        await StorageService.saveUserData('student', student);
       } else {
         const { data: teacher, error } = await supabase
           .from('teachers')
@@ -73,6 +92,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         setUser(teacher);
         setUserType('teacher');
+        await StorageService.saveUserData('teacher', teacher);
+      }
+
+      // Mark first launch as complete
+      if (isFirstLaunch) {
+        await StorageService.setFirstLaunchComplete();
+        setIsFirstLaunch(false);
       }
     } catch (error) {
       throw error;
@@ -84,6 +110,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signOut = async () => {
     setUser(null);
     setUserType(null);
+    await StorageService.clearUserData();
+  };
+
+  const setFirstLaunchComplete = async () => {
+    await StorageService.setFirstLaunchComplete();
+    setIsFirstLaunch(false);
   };
 
   return (
@@ -91,8 +123,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       user,
       userType,
       loading,
+      isFirstLaunch,
       signIn,
       signOut,
+      setFirstLaunchComplete,
     }}>
       {children}
     </AuthContext.Provider>

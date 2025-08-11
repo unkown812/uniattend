@@ -1,22 +1,38 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View,Image } from 'react-native';
+import { StyleSheet, Text, View, Image } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 
 export default function SplashScreen() {
   const router = useRouter();
+  const { user, userType, loading, isFirstLaunch } = useAuth();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      router.replace('/login-selection');
-    }, 4000); 
+    if (!loading) {
+      const timer = setTimeout(() => {
+        if (isFirstLaunch) {
+          // First time launch - show signup
+          router.replace('/login-selection');
+        } else if (user && userType) {
+          // User is logged in - redirect to appropriate subjects
+          if (userType === 'student') {
+            router.replace('/subjects-students');
+          } else if (userType === 'teacher') {
+            router.replace('/subjects-teachers');
+          }
+        } else {
+          // Not first launch but not logged in - show login
+          router.replace('/login-selection');
+        }
+      }, 2000); // Reduced from 4000ms for better UX
 
-    return () => clearTimeout(timer);
-  }, [router]);
+      return () => clearTimeout(timer);
+    }
+  }, [router, user, userType, loading, isFirstLaunch]);
 
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
-        {/* <MaterialIcons name="person" size={100} color="#004d40" /> */}
         <Image source={require('../assets/images/logo.png')} style={styles.checkIcon} />
       </View>
       <Text style={styles.title}>UniAttend</Text>

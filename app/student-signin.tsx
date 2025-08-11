@@ -32,13 +32,16 @@ export default function StudentSigninScreen() {
     setLoading(true);
     try {
       // Cross-check input data with database
-      const { data: student, error } = await supabase
+      const { data: student, error: error } = await supabase
         .from("students")
-        .select("id, username, password")
-        .eq("roll", parseInt(rollNo))
-        .eq("course", course)
-        .eq("sem", parseInt(sem))
-        .eq("username", name)
+        .insert({
+          username: name,
+          course,
+          sem: parseInt(sem),
+          roll: parseInt(rollNo),
+          password: password
+        })
+        .select()
         .single();
 
       if (error) {
@@ -50,11 +53,13 @@ export default function StudentSigninScreen() {
         return;
       }
 
+      // Verify password
       if (student.password !== password) {
         Alert.alert("Error", "Invalid password. Please try again.");
         return;
       }
 
+      // Successful login
       router.push({
         pathname: "/subjects-students",
         params: { studentId: student.id, course, sem }

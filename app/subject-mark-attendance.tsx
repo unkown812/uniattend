@@ -44,7 +44,6 @@ export default function SubjectMarkAttendanceScreen() {
 
     setMarkingAttendance(true);
     try {
-      // Navigate to student selection screen for attendance marking
       router.push({
         pathname: '/mark-attendance-students',
         params: {

@@ -24,10 +24,6 @@ export default function StudentSigninScreen() {
   const router = useRouter();
 
   const handleStudentSignIn = async () => {
-    if (!name || !course || !sem || !rollNo) {
-      Alert.alert("Error", "Please fill all fields");
-      return;
-    }
 
     setLoading(true);
     try {
@@ -44,7 +40,6 @@ export default function StudentSigninScreen() {
       }
 
       if (existingStudent) {
-        // Student exists, navigate directly
         router.push({
           pathname: "/subjects-students",
           params: { studentId: existingStudent.id, course, sem }
@@ -53,26 +48,24 @@ export default function StudentSigninScreen() {
       }
 
       // Insert new student - matching exact database fields
-      const { data: newStudent, error: insertError } = await supabase
-        .from("students")
-        .insert({
-          username: name,
-          course,
-          sem: parseInt(sem),
-          roll: parseInt(rollNo),
-          password: password
-        })
-        .select()
-        .single();
 
-      if (insertError) {
-        throw insertError;
+
+      const { data: student, error } = await supabase
+        .from("students")
+        .select("id, username, password")
+        .eq("roll", parseInt(rollNo))
+        .eq("course", course)
+        .eq("sem", parseInt(sem))
+        .eq("username", name)
+        .single();
+      if (error) {
+        throw error;
       }
 
       Alert.alert("Success", "Student profile created successfully");
       router.push({
         pathname: "/subjects-students",
-        params: { id: newStudent.id, course, sem }
+        params: { id: student.id, course, sem }
       });
 
     } catch (error: any) {

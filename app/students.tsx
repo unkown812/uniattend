@@ -1,21 +1,29 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, Modal, ActivityIndicator } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, Modal, Alert, Share } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 import { Student } from '../types/database';
+import { useLocalSearchParams } from 'expo-router';
+import { CSVExportService } from '../utils/csvExport';
 
 interface StudentWithStatus extends Student {
   status: 'green' | 'red' | 'white';
 }
 
 export default function StudentsScreen() {
+  const { subjectId } = useLocalSearchParams<{ subjectId: string }>();
   const [modalVisible, setModalVisible] = useState(false);
   const [students, setStudents] = useState<StudentWithStatus[]>([]);
+  const [subject, setSubject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportType, setExportType] = useState<'lecture' | 'month' | 'year'>('lecture');
 
   useEffect(() => {
     fetchStudents();
-  }, []);
+    if (subjectId) {
+      fetchSubject();
+    }
+  }, [subjectId]);
 
   const fetchStudents = async () => {
     try {
@@ -29,10 +37,9 @@ export default function StudentsScreen() {
         throw error;
       }
 
-      // Map database students to UI format with status
       const studentsWithStatus = data.map(student => ({
         ...student,
-        status: 'white' as 'green' | 'red' | 'white' // Default status, can be updated based on attendance
+        status: 'white' as 'green' | 'red' | 'white' 
       }));
 
       setStudents(studentsWithStatus);
@@ -41,6 +48,56 @@ export default function StudentsScreen() {
       console.error('Error fetching students:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSubject = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subjects')
+        .select('name')
+        .eq('id', subjectId)
+        .single();
+
+      if (error) throw error;
+      setSubject(data);
+    } catch (err) {
+      console.error('Error fetching subject:', err);
+    }
+  };
+
+  const handleExport = async (type: 'lecture' | 'month' | 'year') => {
+    try {
+      if (!subjectId) {
+        Alert.alert('Error', 'Subject ID is required');
+        return;
+      }
+
+      let csvContent = '';
+      let filename = '';
+      const currentYear = new Date().getFullYear().toString();
+      const currentMonth = new Date().toISOString().slice(5, 7);
+
+      switch (type) {
+        case 'lecture':
+          const lectureDate = new Date().toISOString().split('T')[0];
+          csvContent = await CSVExportService.exportLectureAttendance(subjectId, lectureDate);
+          filename = `Lecture_${subject?.name || 'Subject'}_${lectureDate}`;
+          break;
+        case 'month':
+          csvContent = await CSVExportService.exportMonthlyAttendance(subjectId, currentMonth, currentYear);
+          filename = `Monthly_${subject?.name || 'Subject'}_${currentYear}_${currentMonth}`;
+          break;
+        case 'year':
+          csvContent = await CSVExportService.exportYearlyAttendance(subjectId, currentYear);
+          filename = `Yearly_${subject?.name || 'Subject'}_${currentYear}`;
+          break;
+      }
+
+      await CSVExportService.shareCSV(csvContent, filename);
+      setModalVisible(false);
+    } catch (error) {
+      Alert.alert('Export Error', error instanceof Error ? error.message : 'Failed to export attendance');
     }
   };
 
@@ -71,8 +128,8 @@ export default function StudentsScreen() {
         contentContainerStyle={styles.listContainer}
       />
 
-      <TouchableOpacity style={styles.exportButton} onPress={() => { setModalVisible(true) }}>
-        <Text style={styles.exportButtonText}>Export</Text>
+      <TouchableOpacity style={styles.exportButton} onPress={() => setModalVisible(true)}>
+        <Text style={styles.exportButtonText}>Export Attendance</Text>
       </TouchableOpacity>
 
       <Modal
@@ -83,14 +140,22 @@ export default function StudentsScreen() {
       >
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPressOut={() => setModalVisible(false)}>
           <View style={styles.bottomPopupContent}>
-            <TouchableOpacity style={styles.popupButton} onPress={() => { /* TODO: Handle Lecture */ }}>
+            <Text style={styles.modalTitle}>Export Attendance</Text>
+            
+            <TouchableOpacity style={styles.popupButton} onPress={() => handleExport('lecture')}>
               <Text style={styles.popupButtonText}>Lecture</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.popupButton} onPress={() => { /* TODO: Handle Month */ }}>
+            
+            <TouchableOpacity style={styles.popupButton} onPress={() => handleExport('month')}>
               <Text style={styles.popupButtonText}>Month</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.popupButton} onPress={() => { /* TODO: Handle Year */ }}>
+            
+            <TouchableOpacity style={styles.popupButton} onPress={() => handleExport('year')}>
               <Text style={styles.popupButtonText}>Year</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.popupButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.popupButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
