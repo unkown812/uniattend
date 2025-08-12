@@ -13,8 +13,8 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { useAuth } from "../context/AuthContext";
 import { COURSES, SEMESTERS } from "../types/database";
+import { supabase } from "@/utils/supabase";
 
 export default function TeacherLoginScreen() {
   const [username, setUsername] = useState("");
@@ -22,7 +22,6 @@ export default function TeacherLoginScreen() {
   const [course, setCourse] = useState("");
   const [semester, setSemester] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
 
   const handleTeacherLogin = async () => {
     if (!username.trim() || !password.trim() || !course || !semester) {
@@ -32,12 +31,24 @@ export default function TeacherLoginScreen() {
 
     setLoading(true);
     try {
-      await signIn("teacher", {
-        username: username.trim(),
-        password: password.trim(),
-        course,
-        semester: parseInt(semester),
-      });
+      // Insert teacher data into Supabase
+      const { data, error } = await supabase
+        .from("teachers")
+        .insert({
+          username: username.trim(),
+          password: password.trim(),
+          course: course,
+          semester: parseInt(semester),
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error inserting teacher:", error);
+        Alert.alert("Registration Error", "Failed to save teacher data");
+        return;
+      }
 
       router.replace("/subjects-teachers");
     } catch (error) {
@@ -150,8 +161,8 @@ const styles = StyleSheet.create({
   },
   image: {
     marginTop: 100,
-    width: 340,
-    height: 340,
+    width: 250,
+    height: 250,
     borderRadius: 70,
     marginVertical: 30,
   },

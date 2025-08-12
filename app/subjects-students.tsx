@@ -1,16 +1,35 @@
-import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import React, { useEffect } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSubjects } from '../hooks/useSubjects';
+import { supabase } from '../utils/supabase';
 
 export default function SubjectsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { subjects, loading, error, fetchSubjects } = useSubjects();
-  
-  const course = params.course as string;
-  const semester = parseInt(params.sem as string);
+  const [studentData, setStudentData] = useState<{ course: string; semester: number } | null>(null);
+
+  const course = studentData?.course || (params.course as string);
+  const semester = studentData?.semester || parseInt(params.sem as string);
+
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      if (params.studentId) {
+        const { data, error } = await supabase
+          .from('students')
+          .select('course, semester')
+          .eq('id', params.studentId)
+          .single();
+
+        if (data && !error) {
+          setStudentData(data);
+        }
+      }
+    };
+
+    fetchStudentData();
+  }, [params.studentId]);
 
   useEffect(() => {
     if (course && semester) {
@@ -18,7 +37,15 @@ export default function SubjectsScreen() {
     }
   }, [course, semester]);
 
-  const renderItem = ({ item }: { item: { id: number; name: string; code: string; is_active: boolean } }) => (
+  const getFilteredSubjects = () => {
+    if (!course || !semester) return [];
+
+    return subjects.filter(
+      subject => subject.course === course && subject.semester === semester
+    );
+  };
+
+  const renderItem = ({ item }: { item: { id: number; name: string; code: string; is_active: string } }) => (
     <TouchableOpacity 
       style={styles.subjectItem} 
       onPress={() => router.push(`/subject-mark-attendance?subjectId=${item.id}&subject-Name=${item.name}&studentId=${params.studentId}`)}
@@ -27,7 +54,7 @@ export default function SubjectsScreen() {
       <View
         style={[
           styles.statusIndicator,
-          { backgroundColor: item.is_active ? '#4caf50' : '#f44336' },
+          { backgroundColor: item.is_active === 'active'  ? '#4caf50' : '#f44336'  },
         ]}
       />
     </TouchableOpacity>
@@ -49,6 +76,8 @@ export default function SubjectsScreen() {
     );
   }
 
+  const filteredSubjects = getFilteredSubjects();
+
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -56,12 +85,9 @@ export default function SubjectsScreen() {
           <Text style={styles.title}>Subjects</Text>
           <Text style={styles.subtitle}>List of all subjects</Text>
         </View>
-        <TouchableOpacity style={styles.profileIcon}>
-          <MaterialIcons name="person" size={24} color="#004d40" />
-        </TouchableOpacity>
       </View>
       <FlatList
-        data={subjects}
+        data={filteredSubjects}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}

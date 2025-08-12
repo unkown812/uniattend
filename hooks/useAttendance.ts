@@ -8,8 +8,7 @@ export const useAttendance = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchAttendance = async (filters?: {
-    studentId?: number;
-    subjectId?: number;
+    subjectId?: string;
     course?: string;
     semester?: number;
     date?: string;
@@ -17,10 +16,6 @@ export const useAttendance = () => {
     try {
       setLoading(true);
       let query = supabase.from('attendance').select('*');
-
-      if (filters?.studentId) {
-        query = query.eq('student_id', filters.studentId);
-      }
 
       if (filters?.subjectId) {
         query = query.eq('subject_id', filters.subjectId);
@@ -35,7 +30,7 @@ export const useAttendance = () => {
       }
 
       if (filters?.date) {
-        query = query.eq('date', filters.date);
+        query = query.eq('created_at', filters.date);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -49,19 +44,17 @@ export const useAttendance = () => {
     }
   };
 
-  const markAttendance = async (attendanceData: Omit<Attendance, 'id' | 'created_at'>) => {
+  const markAttendance = async (attendanceData: Omit<Attendance, 'id'>) => {
     try {
       // Check if attendance already exists for this student/subject/date
       const { data: existing, error: checkError } = await supabase
         .from('attendance')
         .select('*')
-        .eq('student_id', attendanceData.student_id)
-        .eq('subject_id', attendanceData.subject_id)
-        .eq('date', attendanceData.date)
+        .eq('subject_code', attendanceData.subject_code)
+        .eq('created_at', attendanceData.created_at)
         .single();
 
       if (existing) {
-        // Update existing record
         const { data, error } = await supabase
           .from('attendance')
           .update({ status: attendanceData.status })
@@ -102,7 +95,7 @@ export const useAttendance = () => {
       const { data, error } = await supabase
         .from('attendance')
         .select('*')
-        .eq('subject_id', subjectId)
+        .eq('subject_code', subjectId)
         .eq('course', course)
         .eq('semester', semester);
 
@@ -126,7 +119,7 @@ export const useAttendance = () => {
       const { data, error } = await supabase
         .from('attendance')
         .select('*')
-        .eq('subject_id', subjectId)
+        .eq('subject_code', subjectId)
         .eq('course', course)
         .eq('semester', semester)
         .order('date', { ascending: true });

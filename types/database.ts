@@ -1,5 +1,3 @@
-// Database type definitions for Supabase integration
-
 export interface Student {
   id: number;
   created_at: string;
@@ -37,10 +35,8 @@ export interface Attendance {
   subject: string;
   semester: string;
   course: string;
-  date: string;
+  subject_code: string;
   status: 'present' | 'absent' | 'late';
-  student_id: number;
-  subject_id: number;
 }
 
 export interface Database {
@@ -71,21 +67,44 @@ export interface Database {
 }
 
 // Course options for dropdowns
+// export const COURSES = [
+//   "diploma In Administration Services",
+//   "diploma In Apparel Manufacture and Design",
+//   "diploma In Electronics",
+//   "diploma In Food Technology",
+//   "diploma In Interior Design",
+//   "diploma In Medical Laboratory Technology",
+//   "diploma In Ophthalmic Technology",
+//   "diploma In Pharmacy",
+//   "diploma In Jewellery Design & Manufacture",
+//   "B.Voc In Optometry",
+//   "B.Voc In Fashion Design",
+//   "B.Voc In Food Processing Technology",
+//   "B.Voc In Interior Design",
+//   "B.Voc In Jewellery Design"
+// ] as const;
+
 export const COURSES = [
-  "Diploma In Administration Services",
-  "Diploma In Apparel Manufacture and Design",
-  "Diploma In Electronics",
-  "Diploma In Food Technology",
-  "Diploma In Interior Design",
-  "Diploma In Medical Laboratory Technology",
-  "Diploma In Ophthalmic Technology",
-  "Diploma In Pharmacy",
-  "Diploma In Jewellery Design & Manufacture",
-  "B.Voc In Optometry",
-  "B.Voc In Fashion Design",
-  "B.Voc In Food Processing Technology",
-  "B.Voc In Interior Design",
-  "B.Voc In Jewellery Design"
+  "diploma-administration-services",
+  "diploma-apparel-manufacture-design",
+  "diploma-electronics",
+  "diploma-food-technology",
+  "diploma-interior-design",
+  "diploma-medical-lab-tech",
+  "diploma-ophthalmic-tech",
+  "diploma-pharmacy",
+  "diploma-jewellery-design",
+  "bvoc-optometry",
+  "bvoc-fashion-design",
+  "bvoc-food-processing",
+  "bvoc-interior-design",
+  "bvoc-jewellery-design"
+] as const;
+
+export const SUBJECTS = [
+  "java",
+  "css",
+  "c",
 ] as const;
 
 export type Course = typeof COURSES[number];

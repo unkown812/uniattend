@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Alert } from 'react-native';
 import { supabase } from '../utils/supabase';
 import { Subject } from '../types/database';
 
@@ -13,6 +13,25 @@ export default function SubjectDetailScreen() {
   useEffect(() => {
     if (subjectId) {
       fetchSubject();
+      const channel = supabase
+        .channel(`subject-${subjectId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'subjects',
+            filter: `id=eq.${subjectId}`
+          },
+          (payload) => {
+            setSubject(payload.new as Subject);
+          }
+        )
+        .subscribe();
+        
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [subjectId]);
 
@@ -41,22 +60,44 @@ export default function SubjectDetailScreen() {
   const handleActivate = async () => {
     if (!subject) return;
     
-    try {
-      const newStatus = subject.is_active === 'active' ? 'inactive' : 'active';
-      const { error } = await supabase
-        .from('subjects')
-        .update({ is_active: newStatus })
-        .eq('id', subjectId);
-      
-      if (error) {
-        throw error;
-      }
-      
-      await fetchSubject();
-    } catch (err) {
-      console.error('Error updating subject status:', err);
-      setError('Failed to update subject status');
-    }
+    const isCurrentlyActive = subject.is_active === 'active';
+    const action = isCurrentlyActive ? 'deactivate' : 'activate';
+    const title = `${isCurrentlyActive ? 'Deactivate' : 'Activate'} Subject`;
+    const message = `Are you sure you want to ${action} "${subject.name}"?`;
+    
+    Alert.alert(
+      title,
+      message,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Confirm',
+          onPress: async () => {
+            try {
+              const newStatus = isCurrentlyActive ? 'inactive' : 'active';
+              const { error } = await supabase
+                .from('subjects')
+                .update({ is_active: newStatus })
+                .eq('id', subjectId);
+              
+              if (error) {
+                throw error;
+              }
+              
+              await fetchSubject();
+            } catch (err) {
+              console.error('Error updating subject status:', err);
+              setError('Failed to update subject status');
+            }
+          },
+          style: 'default'
+        }
+      ],
+      { cancelable: true }
+    );
   };
 
   if (loading) {
@@ -97,11 +138,11 @@ export default function SubjectDetailScreen() {
           <Text style={styles.studentListButtonText}>Student   List</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.activateButton, { backgroundColor: subject.is_active ? '#e74c3c' : '#4a7c59' }]}
+          style={[styles.activateButton, { backgroundColor: subject.is_active === 'active' ? '#e74c3c' : '#4a7c59' }]}
           onPress={handleActivate}
         >
           <Text style={styles.activateButtonText}>
-            {subject.is_active ? 'Deactivate' : 'Activate'}
+            {subject.is_active === 'active'? 'Deactivate' : 'Activate'}
           </Text>
         </TouchableOpacity>
       </View>

@@ -21,9 +21,7 @@ export default function TeacherSubjectsScreen() {
   const { getAttendanceStats } = useAttendance();
   const [subjectStats, setSubjectStats] = useState<Record<number, any>>({});
 
-  // Helper function to get semester safely
-
-  const renderItem = ({ item }: { item: { id: string; name: string; is_active: string } }) => (
+  const renderItem = ({ item }: { item: Subject }) => (
     <TouchableOpacity
       style={styles.subjectItem}
       onPress={() => router.push(`/subject-detail?subjectId=${item.id}&subjectName=${item.name}`)}
@@ -42,6 +40,17 @@ export default function TeacherSubjectsScreen() {
     if ('sem' in user) return user.sem;
     if ('semester' in user) return user.semester;
     return null;
+  };
+
+  const getFilteredSubjects = () => {
+    if (!user) return [];
+    
+    const semester = getSemester(user);
+    if (!semester) return [];
+    
+    return subjects.filter(
+      subject => subject.course === user.course && subject.semester === semester
+    );
   };
 
   useEffect(() => {
@@ -65,8 +74,9 @@ export default function TeacherSubjectsScreen() {
     const semester = getSemester(user);
     if (!semester) return;
     
+    const filteredSubjects = getFilteredSubjects();
     const stats: Record<number, any> = {};
-    for (const subject of subjects) {
+    for (const subject of filteredSubjects) {
       try {
         const stat = await getAttendanceStats(subject.id, user.course, semester);
         stats[subject.id] = stat;
@@ -101,16 +111,16 @@ export default function TeacherSubjectsScreen() {
           <Text style={styles.title}>Subjects</Text>
           <Text style={styles.subtitle}>List of all subjects</Text>
         </View>
-        <View style={styles.headerRight}>
+        {/* <View style={styles.headerRight}>
           <TouchableOpacity style={styles.profileIcon} onPress={() => { router.push('/profile-teacher') }}>
             <MaterialIcons name="person" size={24} color="#004d40" />
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
       <FlatList
         data={subjects}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.name}
         contentContainerStyle={styles.listContainer}
       />
       <TouchableOpacity style={styles.addButton} onPress={() => { router.push('/add-subject') }}>

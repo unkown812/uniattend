@@ -13,6 +13,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { supabase } from '../utils/supabase';
 import { useRouter } from 'expo-router';
+import { COURSES } from '@/types/database';
 
 export default function AddSubjectScreen() {
   const router = useRouter();
@@ -29,19 +30,10 @@ export default function AddSubjectScreen() {
 
   const fetchCourses = async () => {
     try {
-      const { data, error } = await supabase
-        .from('subjects')
-        .select('course')
-        .not('course', 'is', null);
-      
-      if (error) throw error;
-      
-      if (data) {
-        const uniqueCourses = [...new Set(data.map(item => item.course))].sort();
-        setCourses(uniqueCourses);
-      }
+      // Use the predefined COURSES array instead of fetching from database
+      setCourses([...COURSES]);
     } catch (error) {
-      console.error('Error fetching courses:', error);
+      console.error('Error loading courses:', error);
       Alert.alert('Error', 'Failed to load courses');
     }
   };
@@ -75,8 +67,8 @@ export default function AddSubjectScreen() {
           name: subjectName.trim(),
           code: subjectCode.toUpperCase(),
           semester: parseInt(semester),
-          // course: course,
-          // teacher_id: user?.id,
+          course: course,
+          is_active: 'inactive'
         })
         .select()
         .single();
@@ -129,7 +121,7 @@ export default function AddSubjectScreen() {
           autoCapitalize="characters"
         />
 
-        {/* <View style={styles.pickerContainer}>
+        <View style={styles.pickerContainer}>
           <Picker
             selectedValue={course}
             onValueChange={(itemValue) => setCourse(itemValue)}
@@ -141,7 +133,7 @@ export default function AddSubjectScreen() {
               <Picker.Item key={c} label={c} value={c} />
             ))}
           </Picker>
-        </View> */}
+        </View>
 
         <View style={styles.pickerContainer}>
           <Picker
