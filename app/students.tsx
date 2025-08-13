@@ -116,21 +116,17 @@ export default function StudentsScreen() {
         .select('*')
         .eq('subject_code', subjectId);
 
-      // Apply date filters based on export type using created_at
       const now = new Date();
       if (type === 'lecture') {
-        // Get records for today
         const today = now.toISOString().split('T')[0];
         const startOfDay = `${today}T00:00:00.000Z`;
         const endOfDay = `${today}T23:59:59.999Z`;
         query = query.gte('created_at', startOfDay).lte('created_at', endOfDay);
       } else if (type === 'month') {
-        // Get records for current month
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
         query = query.gte('created_at', startOfMonth).lte('created_at', endOfMonth);
       } else if (type === 'year') {
-        // Get records for current year
         const startOfYear = new Date(now.getFullYear(), 0, 1).toISOString();
         const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999).toISOString();
         query = query.gte('created_at', startOfYear).lte('created_at', endOfYear);
@@ -150,7 +146,6 @@ export default function StudentsScreen() {
         return;
       }
 
-      // Create CSV content
       const csvRows = [
         ['ID', 'Name', 'Roll', 'Subject', 'Semester', 'Course', 'Date', 'Status', 'Subject ID'],
         ...data.map((record: Attendance) => [
@@ -171,12 +166,9 @@ export default function StudentsScreen() {
       ).join('\n');
 
       const filename = `Attendance_${subject?.name || 'Subject'}_${type}_${new Date().toISOString().split('T')[0]}.csv`;
-      
-      // Create and share the file
       const filePath = `${FileSystem.documentDirectory}${filename}`;
       await FileSystem.writeAsStringAsync(filePath, csvContent);
       
-      // Share the file
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(filePath, {
           mimeType: 'text/csv',

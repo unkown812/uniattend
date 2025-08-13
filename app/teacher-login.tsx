@@ -32,7 +32,7 @@ export default function TeacherLoginScreen() {
     setLoading(true);
     try {
       // Insert teacher data into Supabase
-      const { data, error } = await supabase
+      const { data:teacher, error } = await supabase
         .from("teachers")
         .insert({
           username: username.trim(),
@@ -49,7 +49,10 @@ export default function TeacherLoginScreen() {
         Alert.alert("Registration Error", "Failed to save teacher data");
         return;
       }
-
+      router.push({
+        pathname: "/subjects-teachers",
+        params: { teacherId: teacher.id, course, semester },
+      });
       router.replace("/subjects-teachers");
     } catch (error) {
       Alert.alert(
