@@ -39,7 +39,7 @@ export default function TeacherLoginScreen() {
           password: password.trim(),
           course: course,
           semester: parseInt(semester),
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
         })
         .select()
         .single();
@@ -111,18 +111,65 @@ export default function TeacherLoginScreen() {
         <View style={styles.pickerContainer}>
           <View style={styles.pickerWrapper}>
             <Picker
-              selectedValue={semester}
-              onValueChange={(itemValue) => setSemester(itemValue)}
+              selectedValue={course}
+              onValueChange={(itemValue: string) => setCourse(itemValue)}
               style={styles.picker}
+              dropdownIconColor="#555"
             >
-              <Picker.Item label="Select Semester" value="" />
-              {SEMESTERS.map((semesterOption) => (
-                <Picker.Item
-                  key={semesterOption}
-                  label={semesterOption.toString()}
-                  value={semesterOption.toString()}
-                />
-              ))}
+              <Picker.Item label="Enter Course" value="" />
+              <Picker.Item
+                label="Diploma In Administration Services"
+                value="diploma-administration-services"
+              />
+              <Picker.Item
+                label="Diploma In Apparel Manufacture and Design"
+                value="diploma-apparel-manufacture-design"
+              />
+              <Picker.Item
+                label="Diploma In Electronics"
+                value="diploma-electronics"
+              />
+              <Picker.Item
+                label="Diploma In Food Technology"
+                value="diploma-food-technology"
+              />
+              <Picker.Item
+                label="Diploma In Interior Design"
+                value="diploma-interior-design"
+              />
+              <Picker.Item
+                label="Diploma In Medical Laboratory Technology"
+                value="diploma-medical-lab-tech"
+              />
+              <Picker.Item
+                label="Diploma In Ophthalmic Technology"
+                value="diploma-ophthalmic-tech"
+              />
+              <Picker.Item
+                label="Diploma In Pharmacy"
+                value="diploma-pharmacy"
+              />
+              <Picker.Item
+                label="Diploma In Jewellery Design & Manufacture"
+                value="diploma-jewellery-design"
+              />
+              <Picker.Item label="B.Voc In Optometry" value="bvoc-optometry" />
+              <Picker.Item
+                label="B.Voc In Fashion Design"
+                value="bvoc-fashion-design"
+              />
+              <Picker.Item
+                label="B.Voc In Food Processing Technology"
+                value="bvoc-food-processing"
+              />
+              <Picker.Item
+                label="B.Voc In Interior Design"
+                value="bvoc-interior-design"
+              />
+              <Picker.Item
+                label="B.Voc In Jewellery Design"
+                value="bvoc-jewellery-design"
+              />
             </Picker>
           </View>
         </View>

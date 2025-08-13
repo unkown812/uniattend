@@ -95,7 +95,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await StorageService.saveUserData('teacher', teacher);
       }
 
-      // Mark first launch as complete
       if (isFirstLaunch) {
         await StorageService.setFirstLaunchComplete();
         setIsFirstLaunch(false);

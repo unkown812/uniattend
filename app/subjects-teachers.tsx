@@ -11,7 +11,6 @@ import { useAuth } from '../context/AuthContext';
 import { useSubjects } from '../hooks/useSubjects';
 import { useAttendance } from '../hooks/useAttendance';
 import { Subject } from '../types/database';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 export default function TeacherSubjectsScreen() {
@@ -42,16 +41,6 @@ export default function TeacherSubjectsScreen() {
     return null;
   };
 
-  const getFilteredSubjects = () => {
-    if (!user) return [];
-    
-    const semester = getSemester(user);
-    if (!semester) return [];
-    
-    return subjects.filter(
-      subject => subject.course === user.course && subject.semester === semester
-    );
-  };
 
   useEffect(() => {
     if (user && user.course) {
@@ -73,21 +62,9 @@ export default function TeacherSubjectsScreen() {
     
     const semester = getSemester(user);
     if (!semester) return;
-    
-    const filteredSubjects = getFilteredSubjects();
-    const stats: Record<number, any> = {};
-    for (const subject of filteredSubjects) {
-      try {
-        const stat = await getAttendanceStats(subject.id, user.course, semester);
-        stats[subject.id] = stat;
-      } catch (error) {
-        console.error('Error loading stats for subject:', subject.id, error);
-      }
-    }
-    setSubjectStats(stats);
-  };
 
-
+  }
+  
   if (loading) {
     return (
       <View style={styles.centerContainer}>
@@ -104,6 +81,18 @@ export default function TeacherSubjectsScreen() {
     );
   }
 
+  const getFilteredSubjects = () => {
+    if (!user) return [];
+    
+    const userSemester = getSemester(user);
+    const userCourse = user.course;
+    
+    return subjects.filter(subject => 
+      subject.course === userCourse && 
+      subject.semester === userSemester
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -118,9 +107,9 @@ export default function TeacherSubjectsScreen() {
         </View> */}
       </View>
       <FlatList
-        data={subjects}
+        data={getFilteredSubjects()}
         renderItem={renderItem}
-        keyExtractor={(item) => item.name}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
       />
       <TouchableOpacity style={styles.addButton} onPress={() => { router.push('/add-subject') }}>

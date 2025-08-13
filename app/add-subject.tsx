@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,18 +9,18 @@ import {
   ScrollView,
   Platform,
   Alert,
-} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import { supabase } from '../utils/supabase';
-import { useRouter } from 'expo-router';
-import { COURSES } from '@/types/database';
+} from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import { supabase } from "../utils/supabase";
+import { useRouter } from "expo-router";
+import { COURSES } from "@/types/database";
 
 export default function AddSubjectScreen() {
   const router = useRouter();
-  const [subjectName, setSubjectName] = useState('');
-  const [subjectCode, setSubjectCode] = useState('');
-  const [course, setCourse] = useState('');
-  const [semester, setSemester] = useState('');
+  const [subjectName, setSubjectName] = useState("");
+  const [subjectCode, setSubjectCode] = useState("");
+  const [course, setCourse] = useState("");
+  const [semester, setSemester] = useState("");
   const [courses, setCourses] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -33,14 +33,14 @@ export default function AddSubjectScreen() {
       // Use the predefined COURSES array instead of fetching from database
       setCourses([...COURSES]);
     } catch (error) {
-      console.error('Error loading courses:', error);
-      Alert.alert('Error', 'Failed to load courses');
+      console.error("Error loading courses:", error);
+      Alert.alert("Error", "Failed to load courses");
     }
   };
 
   const onAddPress = async () => {
     if (!subjectName.trim() || !subjectCode.trim() || !course || !semester) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
@@ -49,46 +49,41 @@ export default function AddSubjectScreen() {
     try {
       // Check if subject already exists
       const { data: existingSubject } = await supabase
-        .from('subjects')
-        .select('id')
-        .eq('code', subjectCode.toUpperCase())
+        .from("subjects")
+        .select("id")
+        .eq("code", subjectCode.toUpperCase())
         .single();
 
       if (existingSubject) {
-        Alert.alert('Error', 'Subject with this code already exists');
+        Alert.alert("Error", "Subject with this code already exists");
         setLoading(false);
         return;
       }
 
       // Insert new subject
       const { data, error } = await supabase
-        .from('subjects')
+        .from("subjects")
         .insert({
           name: subjectName.trim(),
           code: subjectCode.toUpperCase(),
           semester: parseInt(semester),
           course: course,
-          is_active: 'inactive'
+          is_active: "inactive",
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      Alert.alert(
-        'Success',
-        'Subject added successfully',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.back(),
-          },
-        ]
-      );
-
+      Alert.alert("Success", "Subject added successfully", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
     } catch (error) {
-      console.error('Error adding subject:', error);
-      Alert.alert('Error', 'Failed to add subject');
+      console.error("Error adding subject:", error);
+      Alert.alert("Error", "Failed to add subject");
     } finally {
       setLoading(false);
     }
@@ -98,7 +93,7 @@ export default function AddSubjectScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
         <Image
-          source={require('../assets/images/education.png')}
+          source={require("../assets/images/education.png")}
           style={styles.image}
           resizeMode="contain"
         />
@@ -124,14 +119,61 @@ export default function AddSubjectScreen() {
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={course}
-            onValueChange={(itemValue) => setCourse(itemValue)}
+            onValueChange={(itemValue: string) => setCourse(itemValue)}
             style={styles.picker}
-            dropdownIconColor="#4a5a4a"
+            dropdownIconColor="#555"
           >
-            <Picker.Item label="Select Course" value="" color="#4a5a4a" />
-            {courses.map((c) => (
-              <Picker.Item key={c} label={c} value={c} />
-            ))}
+            <Picker.Item label="Enter Course" value="" />
+            <Picker.Item
+              label="Diploma In Administration Services"
+              value="diploma-administration-services"
+            />
+            <Picker.Item
+              label="Diploma In Apparel Manufacture and Design"
+              value="diploma-apparel-manufacture-design"
+            />
+            <Picker.Item
+              label="Diploma In Electronics"
+              value="diploma-electronics"
+            />
+            <Picker.Item
+              label="Diploma In Food Technology"
+              value="diploma-food-technology"
+            />
+            <Picker.Item
+              label="Diploma In Interior Design"
+              value="diploma-interior-design"
+            />
+            <Picker.Item
+              label="Diploma In Medical Laboratory Technology"
+              value="diploma-medical-lab-tech"
+            />
+            <Picker.Item
+              label="Diploma In Ophthalmic Technology"
+              value="diploma-ophthalmic-tech"
+            />
+            <Picker.Item label="Diploma In Pharmacy" value="diploma-pharmacy" />
+            <Picker.Item
+              label="Diploma In Jewellery Design & Manufacture"
+              value="diploma-jewellery-design"
+            />
+            <Picker.Item label="B.Voc In Optometry" value="bvoc-optometry" />
+            <Picker.Item
+              label="B.Voc In Fashion Design"
+              value="bvoc-fashion-design"
+            />
+            <Picker.Item
+              label="B.Voc In Food Processing Technology"
+              value="bvoc-food-processing"
+            />
+            <Picker.Item
+              label="B.Voc In Interior Design"
+              value="bvoc-interior-design"
+            />
+            <Picker.Item
+              label="B.Voc In Jewellery Design"
+              value="bvoc-jewellery-design"
+            />
           </Picker>
         </View>
 
@@ -149,13 +191,13 @@ export default function AddSubjectScreen() {
           </Picker>
         </View>
 
-        <TouchableOpacity 
-          style={[styles.addButton, loading && styles.disabledButton]} 
+        <TouchableOpacity
+          style={[styles.addButton, loading && styles.disabledButton]}
           onPress={onAddPress}
           disabled={loading}
         >
           <Text style={styles.addButtonText}>
-            {loading ? 'Adding...' : 'Add Subject'}
+            {loading ? "Adding..." : "Add Subject"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -166,16 +208,16 @@ export default function AddSubjectScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff9f0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#fff9f0",
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 10,
   },
   card: {
     borderRadius: 20,
     padding: 10,
-    width: '90%',
-    alignItems: 'center',
+    width: "90%",
+    alignItems: "center",
   },
   image: {
     width: 280,
@@ -183,60 +225,60 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontFamily: 'ClashDisplay',
+    fontFamily: "ClashDisplay",
     fontSize: 32,
-    fontWeight: '400',
-    color: '#000',
+    fontWeight: "400",
+    color: "#000",
     marginBottom: 80,
   },
   input: {
-    backgroundColor: '#a9cbb7',
-    width: '100%',
+    backgroundColor: "#a9cbb7",
+    width: "100%",
     borderRadius: 20,
-    paddingVertical: Platform.OS === 'ios' ? 15 : 10,
+    paddingVertical: Platform.OS === "ios" ? 15 : 10,
     paddingHorizontal: 20,
     fontSize: 16,
-    fontFamily: 'ClashDisplay',
-    color: '#000',
+    fontFamily: "ClashDisplay",
+    color: "#000",
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: '#000',
+    borderColor: "#000",
   },
   pickerContainer: {
-    backgroundColor: '#a9cbb7',
+    backgroundColor: "#a9cbb7",
     borderRadius: 20,
-    width: '100%',
+    width: "100%",
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: '#000',
-    overflow: 'hidden',
+    borderColor: "#000",
+    overflow: "hidden",
   },
   picker: {
-    width: '100%',
-    color: '#000',
-    fontFamily: 'ClashDisplay',
+    width: "100%",
+    color: "#000",
+    fontFamily: "ClashDisplay",
   },
   addButton: {
-    backgroundColor: '#4a7c59',
+    backgroundColor: "#4a7c59",
     borderRadius: 20,
     paddingVertical: 15,
     paddingHorizontal: 60,
     marginTop: 10,
     borderWidth: 1,
-    borderColor: '#000',
-    shadowColor: '#bfcbb8',
+    borderColor: "#000",
+    shadowColor: "#bfcbb8",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 4,
     elevation: 4,
   },
   disabledButton: {
-    backgroundColor: '#a9a9a9',
+    backgroundColor: "#a9a9a9",
   },
   addButtonText: {
-    fontFamily: 'ClashDisplay',
+    fontFamily: "ClashDisplay",
     fontSize: 20,
-    color: '#000',
-    fontWeight: '400',
+    color: "#000",
+    fontWeight: "400",
   },
 });
