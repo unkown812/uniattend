@@ -33,23 +33,23 @@ export default function TeacherLoginScreen() {
     }
 
     const getOrCreateDeviceId = async () => {
-        let storedId = await SecureStore.getItemAsync("device_id");
-        if (!storedId) {
-          let androidId = '';
-          try {
-            androidId = Application.getAndroidId ? Application.getAndroidId() : Date.now().toString();
-          } catch {
-            androidId = Date.now().toString();
-          }
-          const newId = `${androidId}-${Math.random()
-            .toString(36)
-            .substring(2, 10)}`;
-          await SecureStore.setItemAsync("device_id", newId);
-          storedId = newId;
+      let storedId = await SecureStore.getItemAsync("device_id");
+      if (!storedId) {
+        let androidId = '';
+        try {
+          androidId = Application.getAndroidId ? Application.getAndroidId() : Date.now().toString();
+        } catch {
+          androidId = Date.now().toString();
         }
-        return storedId;
-      };
-    
+        const newId = `${androidId}-${Math.random()
+          .toString(36)
+          .substring(2, 10)}`;
+        await SecureStore.setItemAsync("device_id", newId);
+        storedId = newId;
+      }
+      return storedId;
+    };
+
     const collectDeviceInfo = async () => {
       const uniqueId = await getOrCreateDeviceId();
 
@@ -66,8 +66,6 @@ export default function TeacherLoginScreen() {
         `app_version: ${clean(Application.nativeApplicationVersion)}`
       ];
     };
-
-
 
     setLoading(true);
     try {
