@@ -13,7 +13,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo.png",
-        "backgroundColor": "#fff9e5ff"
+        "backgroundColor": "#ffffffff"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.unkown812dev.uniattend"
@@ -33,7 +33,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#fff9e5ff"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

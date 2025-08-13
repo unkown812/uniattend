@@ -14,9 +14,6 @@ import { useRouter } from "expo-router";
 import { supabase } from "../utils/supabase";
 import { Picker } from "@react-native-picker/picker";
 import { COURSES, SEMESTERS } from "../types/database";
-import * as Device from "expo-device";
-import * as Application from "expo-application";
-import * as SecureStore from "expo-secure-store";
 
 export default function TeacherSigninScreen() {
   const [name, setName] = useState("");
@@ -26,31 +23,6 @@ export default function TeacherSigninScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const getOrCreateDeviceId = async () => {
-    let storedId = await SecureStore.getItemAsync("device_id");
-    if (!storedId) {
-      const newId = `${Application.androidId || Date.now().toString()}-${Math.random()
-        .toString(36)
-        .substring(2, 10)}`;
-      await SecureStore.setItemAsync("device_id", newId);
-      storedId = newId;
-    }
-    return storedId;
-  };
-
-  const collectDeviceInfo = async () => {
-    const uniqueId = await getOrCreateDeviceId();
-    return [
-      `device_id: ${uniqueId}`,
-      `brand: ${Device.brand}`,
-      `model: ${Device.modelName}`,
-      `os_name: ${Device.osName}`,
-      `os_version: ${Device.osVersion}`,
-      `device_type: ${Device.deviceType}`,
-      `app_version: ${Application.nativeApplicationVersion || "unknown"}`
-    ];
-  };
-
   const handleSignIn = async () => {
     if (!name || !password || !course || !semester) {
       Alert.alert("Error", "Please enter all fields");
@@ -59,8 +31,6 @@ export default function TeacherSigninScreen() {
 
     setLoading(true);
     try {
-      const deviceInfoArray = await collectDeviceInfo();
-
       const { data: teacher, error } = await supabase
         .from("teachers")
         .select("*")
@@ -78,11 +48,6 @@ export default function TeacherSigninScreen() {
         Alert.alert("Error", "Invalid password. Please try again.");
         return;
       }
-
-      await supabase
-        .from("teachers")
-        .update({ device_info: deviceInfoArray })
-        .eq("id", teacher.id);
 
       Alert.alert("Success", "Login successful!");
       router.push({
@@ -132,64 +97,17 @@ export default function TeacherSigninScreen() {
           <View style={styles.pickerWrapper}>
             <Picker
               selectedValue={course}
-              onValueChange={(itemValue: string) => setCourse(itemValue)}
+              onValueChange={(itemValue) => setCourse(itemValue)}
               style={styles.picker}
-              dropdownIconColor="#555"
             >
-              <Picker.Item label="Enter Course" value="" />
-              <Picker.Item
-                label="Diploma In Administration Services"
-                value="diploma-administration-services"
-              />
-              <Picker.Item
-                label="Diploma In Apparel Manufacture and Design"
-                value="diploma-apparel-manufacture-design"
-              />
-              <Picker.Item
-                label="Diploma In Electronics"
-                value="diploma-electronics"
-              />
-              <Picker.Item
-                label="Diploma In Food Technology"
-                value="diploma-food-technology"
-              />
-              <Picker.Item
-                label="Diploma In Interior Design"
-                value="diploma-interior-design"
-              />
-              <Picker.Item
-                label="Diploma In Medical Laboratory Technology"
-                value="diploma-medical-lab-tech"
-              />
-              <Picker.Item
-                label="Diploma In Ophthalmic Technology"
-                value="diploma-ophthalmic-tech"
-              />
-              <Picker.Item
-                label="Diploma In Pharmacy"
-                value="diploma-pharmacy"
-              />
-              <Picker.Item
-                label="Diploma In Jewellery Design & Manufacture"
-                value="diploma-jewellery-design"
-              />
-              <Picker.Item label="B.Voc In Optometry" value="bvoc-optometry" />
-              <Picker.Item
-                label="B.Voc In Fashion Design"
-                value="bvoc-fashion-design"
-              />
-              <Picker.Item
-                label="B.Voc In Food Processing Technology"
-                value="bvoc-food-processing"
-              />
-              <Picker.Item
-                label="B.Voc In Interior Design"
-                value="bvoc-interior-design"
-              />
-              <Picker.Item
-                label="B.Voc In Jewellery Design"
-                value="bvoc-jewellery-design"
-              />
+              <Picker.Item label="Select Course" value="" />
+              {COURSES.map((courseOption) => (
+                <Picker.Item
+                  key={courseOption}
+                  label={courseOption}
+                  value={courseOption}
+                />
+              ))}
             </Picker>
           </View>
         </View>

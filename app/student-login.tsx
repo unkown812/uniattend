@@ -47,8 +47,6 @@ export default function StudentSigninScreen() {
         return;
       }
 
-      // Insert new student - matching exact database fields
-
 
       const { data: student, error } = await supabase
         .from("students")

@@ -13,9 +13,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../utils/supabase";
-import * as Device from "expo-device";
-import * as Application from "expo-application";
-import * as SecureStore from "expo-secure-store";
 
 export default function StudentSigninScreen() {
   const [name, setName] = useState("");
@@ -23,45 +20,20 @@ export default function StudentSigninScreen() {
   const [course, setCourse] = useState("");
   const [sem, setSem] = useState("");
   const [rollNo, setRollNo] = useState("");
+  const [macAddress, setMacAddress] = useState("");
   const [loading, setLoading] = useState(false);
+
   const router = useRouter();
 
-  const getOrCreateDeviceId = async () => {
-    let storedId = await SecureStore.getItemAsync("device_id");
-    if (!storedId) {
-      const newId = `${Application.androidId || Date.now().toString()}-${Math.random()
-        .toString(36)
-        .substring(2, 10)}`;
-      await SecureStore.setItemAsync("device_id", newId);
-      storedId = newId;
-    }
-    return storedId;
-  };
-
-  const collectDeviceInfo = async () => {
-    const uniqueId = await getOrCreateDeviceId();
-    return [
-      `device_id: ${uniqueId}`,
-      `brand: ${Device.brand}`,
-      `model: ${Device.modelName}`,
-      `os_name: ${Device.osName}`,
-      `os_version: ${Device.osVersion}`,
-      `device_type: ${Device.deviceType}`,
-      `app_version: ${Application.nativeApplicationVersion || "unknown"}`
-    ];
-  };
-
   const handleStudentSignIn = async () => {
-    if (!name || !password || !course || !sem || !rollNo) {
+    if (!name || !password) {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
 
     setLoading(true);
     try {
-      const deviceInfoArray = await collectDeviceInfo();
-
-      const { data: student, error } = await supabase
+      const { data: student, error: error } = await supabase
         .from("students")
         .insert({
           username: name,
@@ -69,27 +41,36 @@ export default function StudentSigninScreen() {
           sem: parseInt(sem),
           roll: parseInt(rollNo),
           password: password,
-          device_info: deviceInfoArray
+          mac:macAddress
         })
         .select()
         .single();
 
       if (error) {
-        throw error;
+        if (error.code === "PGRST116") {
+          Alert.alert("Error", "Student not found. Please check your details.");
+        } else {
+          throw error;
+        }
+        return;
       }
 
+      // Verify password
       if (student.password !== password) {
         Alert.alert("Error", "Invalid password. Please try again.");
         return;
       }
 
+      // Successful login
       router.push({
         pathname: "/subjects-students",
         params: { studentId: student.id, course, sem },
       });
     } catch (error: any) {
       console.error("Sign in error:", error);
-      Alert.alert("Error", error?.message || "Failed to sign in");
+      const errorMessage =
+        error?.message || error?.details || "Failed to sign in";
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -106,12 +87,14 @@ export default function StudentSigninScreen() {
           source={require("../assets/images/professor.png")}
           style={styles.image}
         />
+
         <TextInput
           style={styles.input}
           placeholder="Enter Name"
           value={name}
           onChangeText={setName}
         />
+
         <TextInput
           style={styles.input}
           placeholder="Enter Password"
@@ -119,6 +102,7 @@ export default function StudentSigninScreen() {
           onChangeText={setPassword}
           secureTextEntry
         />
+
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={course}
@@ -179,6 +163,7 @@ export default function StudentSigninScreen() {
             />
           </Picker>
         </View>
+
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={sem}
@@ -187,11 +172,17 @@ export default function StudentSigninScreen() {
             dropdownIconColor="#555"
           >
             <Picker.Item label="Enter Semester" value="" />
-            {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
-              <Picker.Item key={num} label={`${num}`} value={`${num}`} />
-            ))}
+            <Picker.Item label="1" value="1" />
+            <Picker.Item label="2" value="2" />
+            <Picker.Item label="3" value="3" />
+            <Picker.Item label="4" value="4" />
+            <Picker.Item label="5" value="5" />
+            <Picker.Item label="6" value="6" />
+            <Picker.Item label="7" value="7" />
+            <Picker.Item label="8" value="8" />
           </Picker>
         </View>
+
         <TextInput
           style={styles.input}
           placeholder="Enter Roll no."
@@ -199,6 +190,7 @@ export default function StudentSigninScreen() {
           onChangeText={setRollNo}
           keyboardType="numeric"
         />
+
         <TouchableOpacity
           style={[styles.button, loading && { opacity: 0.7 }]}
           onPress={handleStudentSignIn}

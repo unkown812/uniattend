@@ -15,6 +15,9 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { COURSES, SEMESTERS } from "../types/database";
 import { supabase } from "@/utils/supabase";
+import * as Device from "expo-device";
+import * as Application from "expo-application";
+import * as SecureStore from "expo-secure-store";
 
 export default function TeacherLoginScreen() {
   const [username, setUsername] = useState("");
@@ -29,10 +32,47 @@ export default function TeacherLoginScreen() {
       return;
     }
 
+    const getOrCreateDeviceId = async () => {
+        let storedId = await SecureStore.getItemAsync("device_id");
+        if (!storedId) {
+          let androidId = '';
+          try {
+            androidId = Application.getAndroidId ? Application.getAndroidId() : Date.now().toString();
+          } catch {
+            androidId = Date.now().toString();
+          }
+          const newId = `${androidId}-${Math.random()
+            .toString(36)
+            .substring(2, 10)}`;
+          await SecureStore.setItemAsync("device_id", newId);
+          storedId = newId;
+        }
+        return storedId;
+      };
+    
+    const collectDeviceInfo = async () => {
+      const uniqueId = await getOrCreateDeviceId();
+
+      const clean = (value: any) =>
+        String(value || "unknown").replace(/\r?\n|\r/g, " ").trim();
+
+      return [
+        `device_id: ${clean(uniqueId)}`,
+        `brand: ${clean(Device.brand)}`,
+        `model: ${clean(Device.modelName)}`,
+        `os_name: ${clean(Device.osName)}`,
+        `os_version: ${clean(Device.osVersion)}`,
+        `device_type: ${clean(Device.deviceType)}`,
+        `app_version: ${clean(Application.nativeApplicationVersion)}`
+      ];
+    };
+
+
+
     setLoading(true);
     try {
-      // Insert teacher data into Supabase
-      const { data:teacher, error } = await supabase
+      const deviceInfo = await collectDeviceInfo();
+      const { data: teacher, error } = await supabase
         .from("teachers")
         .insert({
           username: username.trim(),
@@ -40,6 +80,7 @@ export default function TeacherLoginScreen() {
           course: course,
           semester: parseInt(semester),
           created_at: new Date().toISOString(),
+          device_info: deviceInfo
         })
         .select()
         .single();
@@ -53,7 +94,6 @@ export default function TeacherLoginScreen() {
         pathname: "/subjects-teachers",
         params: { teacherId: teacher.id, course, semester },
       });
-      router.replace("/subjects-teachers");
     } catch (error) {
       Alert.alert(
         "Login Failed",
@@ -92,24 +132,6 @@ export default function TeacherLoginScreen() {
           secureTextEntry
         />
 
-        <View style={styles.pickerContainer}>
-          <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={course}
-              onValueChange={(itemValue) => setCourse(itemValue)}
-              style={styles.picker}
-            >
-              <Picker.Item label="Select Course" value="" />
-              {COURSES.map((courseOption) => (
-                <Picker.Item
-                  key={courseOption}
-                  label={courseOption}
-                  value={courseOption}
-                />
-              ))}
-            </Picker>
-          </View>
-        </View>
 
         <View style={styles.pickerContainer}>
           <View style={styles.pickerWrapper}>
@@ -177,6 +199,25 @@ export default function TeacherLoginScreen() {
           </View>
         </View>
 
+        <View style={styles.pickerContainer}>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={semester}
+              onValueChange={(itemValue) => setSemester(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select Semester" value="" />
+              {SEMESTERS.map((semesterOption) => (
+                <Picker.Item
+                  key={semesterOption.toString()}
+                  label={semesterOption.toString()}
+                  value={semesterOption.toString()}
+                />
+              ))}
+            </Picker>
+          </View>
+        </View>
+
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleTeacherLogin}
@@ -205,14 +246,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff9f0",
     borderRadius: 20,
-    padding: 20,
+    // padding: 20,
     alignItems: "center",
     justifyContent: "center",
   },
   image: {
-    marginTop: 100,
-    width: 250,
-    height: 250,
+    marginTop: 50,
+    width: 150,
+    height: 150,
     borderRadius: 70,
     marginVertical: 30,
   },
