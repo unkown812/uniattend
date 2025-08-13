@@ -1,50 +1,123 @@
-# Welcome to your Expo app 👋
+#  UNIAttend
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An intelligent and user-friendly cross-platform attendance app built with **React Native + Expo**. Developed to simplify attendance management for students and educators with modern UI, offline support, and flexible syncing.
 
-## Get started
+---
 
-1. Install dependencies
+##  Features
 
-   ```bash
-   npm install
-   ```
+- **Easy to Use** – Easy to use and Simple and Modern Attractive UI.
+- **Intuitive Design** – Clean architecture with reusable components, contexts, hooks, and utility modules.
+- **Configurable Subjects** – Add, edit, or remove subjects easily via dedicated schema (`fix-subjects-schema.sql`).
+- **Modular and Scalable** – Built with TypeScript for maintainability, and structured to accommodate future enhancements.
+- **Fast Development** – Built on Expo platform—run instantly on the web, Android emulator, or iOS simulator with live reload.
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
+##  Project Structure
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+uniattend/
+├── .vscode/                 Visual Studio Code configuration
+├── app/                     Main app source (screens, routing, UI)
+├── assets/                  Images and static assets
+├── components/              Reusable UI components
+├── constants/               App-level constants (colors, sizes, etc.)
+├── context/                 React Context providers (state management)
+├── hooks/                   Reusable custom React hooks
+├── scripts/                 Utility or build-related scripts
+├── types/                   TypeScript type definitions
+├── utils/                   Helper functions and utilities
+├── .env                     Environment variables (gitignored)
+├── image.png                Preview or screenshot of the app
+├── package.json             Project dependencies and scripts
+├── tsconfig.json            TypeScript configuration
+└── README.md                ← You're here!
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+##  Getting Started
 
-To learn more about developing your project with Expo, look at the following resources:
+### Prerequisites
+- **Node.js** (v14+ recommended)
+- **npm** or **yarn**
+- **Expo CLI** (install globally via `npm install -g expo-cli`)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+---
 
-## Join the community
+### Installation & Running Locally
 
-Join our community of developers creating universal apps.
+```bash
+# 1. Clone the repository
+git clone https://github.com/unkown812/uniattend.git
+cd uniattend
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# 2. Install dependencies
+npm install
+# or
+yarn install
+
+# 3. Start the app
+npx expo start
+```
+
+Choose one of the available options:
+- **Android Emulator**
+- **iOS Simulator**
+- **Expo Go** (scan QR on your device)
+- **Web Browser** (via `w` key)
+
+---
+
+##  Managing Subjects Schema
+
+Need to update or reset the subjects data schema? Apply the included SQL script:
+
+```bash
+# Execute in your SQLite/PostgreSQL/MySQL client or via CLI
+\i fix-subjects-schema.sql
+```
+
+This ensures your database remains in sync with the latest schema design.
+
+---
+
+##  Contributing
+
+We welcome contributions! Here’s how to get started:
+
+1. Fork the repository  
+2. Create a feature branch: `git checkout -b feature/YourFeature`  
+3. Commit your changes: `git commit -am "Add some feature"`  
+4. Push to the branch: `git push origin feature/YourFeature`  
+5. Open a Pull Request—we’d love to review it!
+
+---
+
+##  Roadmap
+
+- [ ] Attendance reports and analytics
+- [ ] Push notifications for reminders
+- [ ] User authentication flow
+- [ ] Cloud backup & multi-device sync
+- [ ] Dark mode / theme toggle support
+
+---
+
+##  Acknowledgments
+
+- Built on top of **Expo**—thank you for the instant development experience.
+- Inspired by other open-source attendance apps and best practices.
+
+---
+
+##  License
+
+Distributed under the **MIT License**. See `LICENSE` for more.
+
+---
+
+##  Contact / Support
+
+Got questions, ideas, or feedback? Feel free to open an issue or reach out via GitHub Discussions. Let's build the future of attendance tracking together!
