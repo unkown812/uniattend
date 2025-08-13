@@ -12,64 +12,99 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../utils/supabase";
+import * as Device from "expo-device";
+import * as Application from "expo-application";
+import * as SecureStore from "expo-secure-store";
 
 export default function StudentSigninScreen() {
   const [name, setName] = useState("");
+  const [password, setPassword] = useState('');
   const [course, setCourse] = useState("");
   const [sem, setSem] = useState("");
-  const [rollNo, setRollNo] = useState("");
   const [loading, setLoading] = useState(false);
-  const [password, setPassword] = useState('');
-
   const router = useRouter();
 
-  const handleStudentSignIn = async () => {
+  const getOrCreateDeviceId = async () => {
+    let storedId = await SecureStore.getItemAsync("device_id");
+    if (!storedId) {
+      let androidId = '';
+      try {
+        androidId = Application.getAndroidId ? Application.getAndroidId() : Date.now().toString();
+      } catch {
+        androidId = Date.now().toString();
+      }
+      const newId = `${androidId}-${Math.random()
+        .toString(36)
+        .substring(2, 10)}`;
+      await SecureStore.setItemAsync("device_id", newId);
+      storedId = newId;
+    }
+    return storedId;
+  };
 
+  const collectDeviceInfo = async () => {
+
+    const clean = (value: any) =>
+      String(value || "unknown").replace(/\r?\n|\r/g, " ").trim();
+
+    return [
+      `brand: ${clean(Device.brand)}`,
+      `model: ${clean(Device.modelName)}`,
+      `os_name: ${clean(Device.osName)}`,
+      `os_version: ${clean(Device.osVersion)}`,
+      `device_type: ${clean(Device.deviceType)}`,
+    ];
+  };
+
+  const handleStudentSignIn = async () => {
     setLoading(true);
     try {
-      // Check if student exists
-      const { data: existingStudent, error: checkError } = await supabase
-        .from("students")
-        .select("id")
-        .eq("roll", parseInt(rollNo))
-        .eq("course", course)
-        .single();
-
-      if (checkError && checkError.code !== "PGRST116") {
-        throw checkError;
-      }
-
-      if (existingStudent) {
-        router.push({
-          pathname: "/subjects-students",
-          params: { studentId: existingStudent.id, course, sem }
-        });
-        return;
-      }
-
 
       const { data: student, error } = await supabase
         .from("students")
-        .select("id, username, password")
-        .eq("roll", parseInt(rollNo))
+        .select("*")
+        .eq("username", name)
+        .eq("password", password)
         .eq("course", course)
         .eq("sem", parseInt(sem))
-        .eq("username", name)
         .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (!student) {
+        Alert.alert("Error", "Invalid credentials");
+        return;
+      }
+
+      const match = student.device_info?.includes(`model: ${Device.modelName}`);
+
+      if (!match) {
+        Alert.alert("Error", "Login not allowed from this device");
+        return;
+      }
+
+      if (student) {
+        router.push({
+          pathname: "/subjects-students",
+          params: { studentId: student.id, course, sem }
+        });
+        return;
+      }
       if (error) {
         throw error;
       }
 
       Alert.alert("Success", "Student profile created successfully");
-      router.push({
-        pathname: "/subjects-students",
-        params: { id: student.id, course, sem }
-      });
+      // router.push({
+      //   pathname: "/subjects-students",
+      //   params: { id: student.id, course, sem }
+      // });
 
-    } catch (error: any) {
-      console.error("Sign in error:", error);
-      const errorMessage = error?.message || error?.details || "Failed to sign in";
-      Alert.alert("Error", errorMessage);
+    } catch (err) {
+      console.error("Login error:", err);
+      Alert.alert("Error", "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -97,6 +132,79 @@ export default function StudentSigninScreen() {
         onChangeText={setPassword}
         secureTextEntry
       />
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={course}
+          onValueChange={(itemValue: string) => setCourse(itemValue)}
+          style={styles.picker}
+          dropdownIconColor="#555"
+        >
+          <Picker.Item label="Enter Course" value="" />
+          <Picker.Item
+            label="Diploma In Administration Services"
+            value="diploma-administration-services"
+          />
+          <Picker.Item
+            label="Diploma In Apparel Manufacture and Design"
+            value="diploma-apparel-manufacture-design"
+          />
+          <Picker.Item
+            label="Diploma In Electronics"
+            value="diploma-electronics"
+          />
+          <Picker.Item
+            label="Diploma In Food Technology"
+            value="diploma-food-technology"
+          />
+          <Picker.Item
+            label="Diploma In Interior Design"
+            value="diploma-interior-design"
+          />
+          <Picker.Item
+            label="Diploma In Medical Laboratory Technology"
+            value="diploma-medical-lab-tech"
+          />
+          <Picker.Item
+            label="Diploma In Ophthalmic Technology"
+            value="diploma-ophthalmic-tech"
+          />
+          <Picker.Item label="Diploma In Pharmacy" value="diploma-pharmacy" />
+          <Picker.Item
+            label="Diploma In Jewellery Design & Manufacture"
+            value="diploma-jewellery-design"
+          />
+          <Picker.Item label="B.Voc In Optometry" value="bvoc-optometry" />
+          <Picker.Item
+            label="B.Voc In Fashion Design"
+            value="bvoc-fashion-design"
+          />
+          <Picker.Item
+            label="B.Voc In Food Processing Technology"
+            value="bvoc-food-processing"
+          />
+          <Picker.Item
+            label="B.Voc In Interior Design"
+            value="bvoc-interior-design"
+          />
+          <Picker.Item
+            label="B.Voc In Jewellery Design"
+            value="bvoc-jewellery-design"
+          />
+        </Picker>
+      </View>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={sem}
+          onValueChange={(itemValue: string) => setSem(itemValue)}
+          style={styles.picker}
+          dropdownIconColor="#555"
+        >
+          <Picker.Item label="Enter Semester" value="" />
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
+            <Picker.Item key={num} label={`${num}`} value={`${num}`} />
+          ))}
+        </Picker>
+      </View>
 
       <TouchableOpacity
         style={[styles.button, loading && { opacity: 0.7 }]}
@@ -119,7 +227,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff9f0",
     borderRadius: 20,
-    padding: 20,
+    // padding: 20,
     alignItems: "center",
   },
   image: {

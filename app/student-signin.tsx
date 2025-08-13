@@ -14,8 +14,6 @@ import {
 import { useRouter } from "expo-router";
 import { supabase } from "../utils/supabase";
 import * as Device from "expo-device";
-import * as Application from "expo-application";
-import * as SecureStore from "expo-secure-store";
 
 export default function StudentSigninScreen() {
   const [name, setName] = useState("");
@@ -26,36 +24,25 @@ export default function StudentSigninScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const getOrCreateDeviceId = async () => {
-    let storedId = await SecureStore.getItemAsync("device_id");
-    if (!storedId) {
-      const newId = `${Application.androidId || Date.now().toString()}-${Math.random()
-        .toString(36)
-        .substring(2, 10)}`;
-      await SecureStore.setItemAsync("device_id", newId);
-      storedId = newId;
-    }
-    return storedId;
-  };
-
-  const collectDeviceInfo = async () => {
-    const uniqueId = await getOrCreateDeviceId();
-    return [
-      `device_id: ${uniqueId}`,
-      `brand: ${Device.brand}`,
-      `model: ${Device.modelName}`,
-      `os_name: ${Device.osName}`,
-      `os_version: ${Device.osVersion}`,
-      `device_type: ${Device.deviceType}`,
-      `app_version: ${Application.nativeApplicationVersion || "unknown"}`
-    ];
-  };
-
   const handleStudentSignIn = async () => {
     if (!name || !password || !course || !sem || !rollNo) {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
+
+    const collectDeviceInfo = async () => {
+
+      const clean = (value: any) =>
+        String(value || "unknown").replace(/\r?\n|\r/g, " ").trim();
+
+      return [
+        `brand: ${clean(Device.brand)}`,
+        `model: ${clean(Device.modelName)}`,
+        `os_name: ${clean(Device.osName)}`,
+        `os_version: ${clean(Device.osVersion)}`,
+        `device_type: ${clean(Device.deviceType)}`,
+      ];
+    };
 
     setLoading(true);
     try {
@@ -65,10 +52,11 @@ export default function StudentSigninScreen() {
         .from("students")
         .insert({
           username: name,
+          password: password,
           course,
           sem: parseInt(sem),
           roll: parseInt(rollNo),
-          password: password,
+          created_at: new Date().toISOString(),
           device_info: deviceInfoArray
         })
         .select()
@@ -207,6 +195,9 @@ export default function StudentSigninScreen() {
           <Text style={styles.buttonText}>
             {loading ? "Processing..." : "Continue"}
           </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/student-login')}>
+          <Text style={styles.newHereText}>Already User? </Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

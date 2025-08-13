@@ -1,97 +1,81 @@
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Image,
   StyleSheet,
-  Platform,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
+  Image,
+  TextInput,
   Alert,
-  KeyboardAvoidingView
+  ActivityIndicator,
+  Platform,
+  KeyboardAvoidingView,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { supabase } from "../utils/supabase";
 import { Picker } from "@react-native-picker/picker";
-import { COURSES, SEMESTERS } from "../types/database";
+import { SEMESTERS } from "../types/database";
+import { supabase } from "@/utils/supabase";
 import * as Device from "expo-device";
-import * as Application from "expo-application";
-import * as SecureStore from "expo-secure-store";
 
-export default function TeacherSigninScreen() {
-  const [name, setName] = useState("");
+export default function TeacherLoginScreen() {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [course, setCourse] = useState("");
   const [semester, setSemester] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  const getOrCreateDeviceId = async () => {
-    let storedId = await SecureStore.getItemAsync("device_id");
-    if (!storedId) {
-      const newId = `${Application.androidId || Date.now().toString()}-${Math.random()
-        .toString(36)
-        .substring(2, 10)}`;
-      await SecureStore.setItemAsync("device_id", newId);
-      storedId = newId;
-    }
-    return storedId;
-  };
-
-  const collectDeviceInfo = async () => {
-    const uniqueId = await getOrCreateDeviceId();
-    return [
-      `device_id: ${uniqueId}`,
-      `brand: ${Device.brand}`,
-      `model: ${Device.modelName}`,
-      `os_name: ${Device.osName}`,
-      `os_version: ${Device.osVersion}`,
-      `device_type: ${Device.deviceType}`,
-      `app_version: ${Application.nativeApplicationVersion || "unknown"}`
-    ];
-  };
-
-  const handleSignIn = async () => {
-    if (!name || !password || !course || !semester) {
-      Alert.alert("Error", "Please enter all fields");
+  const handleTeacherLogin = async () => {
+    if (!username.trim() || !password.trim() || !course || !semester) {
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
+    const collectDeviceInfo = async () => {
+
+      const clean = (value: any) =>
+        String(value || "unknown").replace(/\r?\n|\r/g, " ").trim();
+
+      return [
+        `brand: ${clean(Device.brand)}`,
+        `model: ${clean(Device.modelName)}`,
+        `os_name: ${clean(Device.osName)}`,
+        `os_version: ${clean(Device.osVersion)}`,
+        `device_type: ${clean(Device.deviceType)}`,
+      ];
+    };
+
     setLoading(true);
-    try {
-      const deviceInfoArray = await collectDeviceInfo();
+
+    try {  
+      const deviceInfo = await collectDeviceInfo();
 
       const { data: teacher, error } = await supabase
         .from("teachers")
-        .select("*")
-        .eq("username", name)
-        .eq("password", password)
-        .eq("course", course)
-        .eq("semester", parseInt(semester))
+        .insert({
+          username: username.trim(),
+          password: password.trim(),
+          course: course,
+          semester: parseInt(semester),
+          created_at: new Date().toISOString(),
+          device_info: deviceInfo
+        })
+        .select()
         .single();
 
       if (error) {
-        throw error;
-      }
-
-      if (teacher.password !== password) {
-        Alert.alert("Error", "Invalid password. Please try again.");
+        console.error("Error inserting teacher:", error);
+        Alert.alert("Registration Error", "Failed to save teacher data");
         return;
       }
-
-      await supabase
-        .from("teachers")
-        .update({ device_info: deviceInfoArray })
-        .eq("id", teacher.id);
-
-      Alert.alert("Success", "Login successful!");
       router.push({
         pathname: "/subjects-teachers",
-        params: { studentId: teacher.id, course, semester },
+        params: { teacherId: teacher.id, course, semester },
       });
     } catch (error) {
-      console.error("Login error:", error);
-      Alert.alert("Error", "Login failed. Please try again.");
+      Alert.alert(
+        "Login Failed",
+        error instanceof Error ? error.message : "Invalid credentials"
+      );
     } finally {
       setLoading(false);
     }
@@ -107,25 +91,22 @@ export default function TeacherSigninScreen() {
           source={require("../assets/images/teacherIllustration.png")}
           style={styles.image}
         />
-        <Text style={styles.title}>Staff Login</Text>
+        <Text style={styles.title}>Register</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Enter Name"
-          placeholderTextColor={"rgba(0, 0, 0, 0.5)"}
-          value={name}
-          onChangeText={setName}
+          placeholder="Enter Username"
+          value={username}
+          onChangeText={setUsername}
           autoCapitalize="none"
         />
 
         <TextInput
           style={styles.input}
           placeholder="Enter Password"
-          placeholderTextColor={"rgba(0, 0, 0, 0.5)"}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          autoCapitalize="none"
         />
 
         <View style={styles.pickerContainer}>
@@ -214,17 +195,18 @@ export default function TeacherSigninScreen() {
         </View>
 
         <TouchableOpacity
-          style={[styles.button, loading && styles.disabledButton]}
-          onPress={handleSignIn}
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleTeacherLogin}
           disabled={loading}
         >
-          <Text style={styles.buttonText}>
-            {loading ? "Signing In..." : "Login"}
-          </Text>
+          {loading ? (
+            <ActivityIndicator color="#000" />
+          ) : (
+            <Text style={styles.buttonText}>Register</Text>
+          )}
         </TouchableOpacity>
-
         <TouchableOpacity onPress={() => router.push("/teacher-login")}>
-          <Text style={styles.newHereText}>New Here ?</Text>
+          <Text style={styles.newHereText}>Already User </Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -240,20 +222,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff9f0",
     borderRadius: 20,
-    // padding: 20,
     alignItems: "center",
+    justifyContent: "center",
   },
   image: {
-    marginTop: 150,
+    marginTop: 50,
     width: 150,
     height: 150,
     borderRadius: 70,
     marginVertical: 30,
   },
   title: {
-    fontSize: 35,
-    marginBottom: 50,
-    fontWeight: "regular",
+    fontSize: 32,
+    marginBottom: 20,
+    fontWeight: "100",
     fontFamily: "ClashDisplay",
   },
   input: {
@@ -262,6 +244,39 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 64, 48, 0.25)",
     paddingHorizontal: 15,
     marginBottom: 20,
+    fontSize: 16,
+    fontWeight: "100",
+    fontFamily: "ClashDisplay",
+    borderRadius: 30,
+    borderStyle: "solid",
+    borderColor: "#000",
+    borderWidth: 1,
+  },
+  button: {
+    width: "70%",
+    height: 60,
+    backgroundColor: "#4a7c59",
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 30,
+    marginTop: 30,
+  },
+  buttonDisabled: {
+    backgroundColor: "#cccccc",
+  },
+  buttonText: {
+    color: "#000",
+    fontSize: 26,
+    fontWeight: "100",
+    fontFamily: "ClashDisplay",
+  },
+  pickerContainer: {
+    width: "90%",
+    height: Platform.OS === "android" ? 50 : undefined,
+    backgroundColor: "rgba(0, 64, 48, 0.25)",
+    marginVertical: 8,
+    justifyContent: "center",
     fontSize: 16,
     fontWeight: "100",
     fontFamily: "ClashDisplay",
@@ -278,46 +293,31 @@ const styles = StyleSheet.create({
     borderColor: "#000",
     borderWidth: 1,
   },
-  button: {
-    width: "70%",
-    height: 60,
-    backgroundColor: "#4a7c59",
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 50,
-    marginTop: 20,
-  },
-  disabledButton: {
-    backgroundColor: "#cccccc",
-  },
-  buttonText: {
-    color: "#000",
-    fontSize: 26,
-    fontWeight: "regular",
-    fontFamily: "ClashDisplay",
-  },
-  newHereText: {
-    color: "rgba(0, 0, 0, 0.5)",
-    fontSize: 16,
-    textDecorationLine: "underline",
+  pickerWrapper: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     fontWeight: "100",
     fontFamily: "ClashDisplay",
+    gap: 8,
   },
-  pickerContainer: {
-    width: "90%",
-    height: 50,
-    backgroundColor: "rgba(0, 64, 48, 0.25)",
-    marginBottom: 20,
-    borderRadius: 30,
-    borderStyle: "solid",
-    borderColor: "#000",
+  pickerOption: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
     borderWidth: 1,
-    justifyContent: "center",
+    borderColor: "#ccc",
+    backgroundColor: "#f5f5f5",
   },
-  pickerWrapper: {
-    flex: 1,
-    justifyContent: "center",
+  pickerOptionSelected: {
+    backgroundColor: "#4a7c59",
+    borderColor: "#4a7c59",
+  },
+  pickerOptionText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  pickerOptionTextSelected: {
+    color: "#fff",
   },
   picker: {
     width: "100%",
@@ -325,5 +325,13 @@ const styles = StyleSheet.create({
     fontWeight: "100",
     fontFamily: "ClashDisplay",
     fontSize: 16,
+    paddingHorizontal: 15,
+  },
+  newHereText: {
+    color: "rgba(0, 0, 0, 0.5)",
+    fontSize: 24,
+    textDecorationLine: "underline",
+    fontWeight: "100",
+    fontFamily: "ClashDisplay",
   },
 });
