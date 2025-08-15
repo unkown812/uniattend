@@ -19,18 +19,11 @@ export default function StudentsScreen() {
   const fetchAttendanceRecords = async () => {
     try {
       setLoading(true);
-      // console.log('Fetching attendance for subjectId:', subjectId);
-
-      // if (!subjectId || subjectId === 'undefined') {
-      //   console.log('No valid subjectId provided');
-      //   setAttendanceRecords([]);
-      //   return;
-      // }
-
       const { data, error } = await supabase
         .from('attendance')
         .select('*')
         .eq('subject_code', subjectId)
+        .order('created_at', { ascending: true })
 
       // const { data, error } = await query.order('created_at', { ascending: true });
 
@@ -77,7 +70,7 @@ export default function StudentsScreen() {
         {attendanceRecords.map((record) => (
           <View key={record.id} style={styles.tableRow}>
             <Text style={styles.tableCell}>
-              {new Date(record.created_at).toLocaleDateString()}
+              {new Date(record.created_at).toLocaleTimeString()}
             </Text>
             <Text style={styles.tableCell}>{record.name}</Text>
             <Text style={styles.tableCell}>{record.roll}</Text>
@@ -214,7 +207,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 14,
     textAlign: 'center',
-    minWidth: 135,
+    width: 70,
     fontFamily: "ClashDisplay",
   },
   tableHeaderText: {
