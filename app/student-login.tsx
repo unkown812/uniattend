@@ -13,8 +13,6 @@ import {
 import { useRouter } from "expo-router";
 import { supabase } from "../utils/supabase";
 import * as Device from "expo-device";
-import * as Application from "expo-application";
-import * as SecureStore from "expo-secure-store";
 
 export default function StudentSigninScreen() {
   const [name, setName] = useState("");
@@ -23,24 +21,6 @@ export default function StudentSigninScreen() {
   const [sem, setSem] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const getOrCreateDeviceId = async () => {
-    let storedId = await SecureStore.getItemAsync("device_id");
-    if (!storedId) {
-      let androidId = '';
-      try {
-        androidId = Application.getAndroidId ? Application.getAndroidId() : Date.now().toString();
-      } catch {
-        androidId = Date.now().toString();
-      }
-      const newId = `${androidId}-${Math.random()
-        .toString(36)
-        .substring(2, 10)}`;
-      await SecureStore.setItemAsync("device_id", newId);
-      storedId = newId;
-    }
-    return storedId;
-  };
 
   const collectDeviceInfo = async () => {
 
@@ -59,6 +39,10 @@ export default function StudentSigninScreen() {
   const handleStudentSignIn = async () => {
     setLoading(true);
     try {
+      if (!course || !sem) {
+        Alert.alert("Error", "Please select both course and semester.");
+        return;
+      }
 
       const { data: student, error } = await supabase
         .from("students")
@@ -95,12 +79,6 @@ export default function StudentSigninScreen() {
       if (error) {
         throw error;
       }
-
-      Alert.alert("Success", "Student profile created successfully");
-      // router.push({
-      //   pathname: "/subjects-students",
-      //   params: { id: student.id, course, sem }
-      // });
 
     } catch (err) {
       console.error("Login error:", err);
@@ -232,8 +210,8 @@ const styles = StyleSheet.create({
   },
   image: {
     marginTop: 10,
-    width: 340,
-    height: 340,
+    width: 150,
+    height: 150,
     borderRadius: 70,
     marginVertical: 30,
   },
