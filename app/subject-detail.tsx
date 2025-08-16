@@ -20,10 +20,10 @@ export default function SubjectDetailScreen() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (subjectId) {
+    if (subjectId && subjectName) {
       fetchSubject();
     }
-  }, [subjectId]);
+  }, [subjectId,subjectName]);
 
 
   const fetchSubject = async () => {
@@ -51,26 +51,32 @@ export default function SubjectDetailScreen() {
 
   const handleActivate = async () => {
     if (!subject) return;
-    
+
     const newStatus = subject.is_active === "active" ? "inactive" : "active";
-    
+
     const { data, error } = await supabase
       .from("subjects")
       .update({ is_active: newStatus })
+      .eq("name", subjectName)
       .eq("code", subjectId)
-      .select("*")
       .single();
-
-    if (error) {
-      console.error("Error updating subject status:", error);
-      Alert.alert("Error", "Failed to update subject status");
-      return;
-    }
 
     if (data) {
       setSubject(data);
       Alert.alert("Success", `Subject ${newStatus === "active" ? "activated" : "deactivated"} successfully`);
     }
+
+    if (error) {
+      return (
+        <View style={[styles.container, styles.centerContent]}>
+          {/* <Text style={styles.errorText}>{error}</Text> */}
+          <TouchableOpacity style={styles.retryButton} onPress={fetchSubject}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
   };
 
   if (loading) {
@@ -115,7 +121,6 @@ export default function SubjectDetailScreen() {
           style={styles.studentListButton}
           onPress={() =>
             router.push(
-              // `/students?subjectId=${subjectId},subjectDate=${new Date().toISOString()}`
               `/students?subjectId=${subjectId}&subjectName=${subjectName}}`
             )
           }
@@ -178,6 +183,7 @@ const styles = StyleSheet.create({
     borderStyle: "solid",
     borderColor: "#000",
     borderWidth: 1,
+    // overflow: "scroll",
   },
   subjectName: {
     fontSize: 32,

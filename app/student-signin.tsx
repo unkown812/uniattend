@@ -73,7 +73,7 @@ export default function StudentSigninScreen() {
 
       router.push({
         pathname: "/subjects-students",
-        params: { studentId: student.id, course, sem },
+        params: { studentName: name, course, sem },
       });
     } catch (error: any) {
       console.error("Sign in error:", error);

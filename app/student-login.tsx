@@ -72,7 +72,7 @@ export default function StudentSigninScreen() {
       if (student) {
         router.push({
           pathname: "/subjects-students",
-          params: { studentId: student.id, course, sem }
+          params: { studentName: student.name, course, sem }
         });
         return;
       }

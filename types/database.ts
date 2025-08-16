@@ -38,6 +38,14 @@ export interface Attendance {
   subject_code: string;
   status: 'present' | 'absent' | 'late';
 }
+export interface AttendanceRecord {
+  student_id: number;
+  subject_id: number;
+  date: string;
+  status: 'present' | 'absent' | 'late';
+  marked_by: string;
+  subject_code:string
+}
 
 export interface Database {
   public: {

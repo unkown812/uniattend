@@ -9,17 +9,18 @@ export default function SubjectsScreen() {
   const params = useLocalSearchParams();
   const { subjects, loading, error, fetchSubjects } = useSubjects();
   const [studentData, setStudentData] = useState<{ course: string; semester: number } | null>(null);
+  const { studentName } = useLocalSearchParams<{ studentName: string }>();
 
   const course = studentData?.course || (params.course as string);
   const semester = studentData?.semester || parseInt(params.sem as string);
 
   useEffect(() => {
     const fetchStudentData = async () => {
-      if (params.studentId) {
+      if (studentName) {
         const { data, error } = await supabase
           .from('students')
-          .select('course, semester')
-          .eq('id', params.studentId)
+          .select('*')
+          .eq('username', studentName)
           .single();
 
         if (data && !error) {
@@ -29,7 +30,7 @@ export default function SubjectsScreen() {
     };
 
     fetchStudentData();
-  }, [params.studentId]);
+  }, [studentName]);
 
   useEffect(() => {
     if (course && semester) {
@@ -48,7 +49,7 @@ export default function SubjectsScreen() {
   const renderItem = ({ item }: { item: { id: number; name: string; code: string; is_active: string } }) => (
     <TouchableOpacity 
       style={styles.subjectItem} 
-      onPress={() => router.push(`/subject-mark-attendance?subjectId=${item.code}&subject-Name=${item.name}&studentId=${params.studentId}`)}
+      onPress={() => router.push(`/subject-mark-attendance?subjectId=${item.code}&subjectName=${item.name}&studentId=${params.studentId }&studentName=${params.studentName}`)}
     >
       <Text style={styles.subjectText}>{item.name}</Text>
       <Text style={styles.subjectText}>{item.code}</Text>
