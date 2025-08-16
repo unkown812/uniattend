@@ -1,5 +1,5 @@
 import { Picker } from "@react-native-picker/picker";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Image,
   Platform,
@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  BackHandler
 } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../utils/supabase";

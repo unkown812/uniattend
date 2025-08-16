@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import {
   StyleSheet,
   Text,
@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Platform,
   KeyboardAvoidingView,
+  BackHandler
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { SEMESTERS } from "../types/database";

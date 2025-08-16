@@ -1,25 +1,36 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSubjects } from '../hooks/useSubjects';
-import { supabase } from '../utils/supabase';
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  BackHandler,
+} from "react-native";
+import { useSubjects } from "../hooks/useSubjects";
+import { supabase } from "../utils/supabase";
 
 export default function SubjectsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { subjects, loading, error, fetchSubjects } = useSubjects();
-  const [studentData, setStudentData] = useState<{ course: string; semester: number } | null>(null);
+  const [studentData, setStudentData] = useState<{
+    course: string;
+    semester: number;
+  } | null>(null);
 
-  const course =  (params.course as string);
+  const course = params.course as string;
   const semester = parseInt(params.semester as string);
 
   useEffect(() => {
     const fetchStudentData = async () => {
       if (params.studentId) {
         const { data, error } = await supabase
-          .from('teachers')
-          .select('course, semester')
-          .eq('id', params.teacherId)
+          .from("teachers")
+          .select("course, semester")
+          .eq("id", params.teacherId)
           .single();
 
         if (data && !error) {
@@ -41,21 +52,32 @@ export default function SubjectsScreen() {
     if (!course || !semester) return [];
 
     return subjects.filter(
-      subject => subject.course === course && subject.semester === semester
+      (subject) => subject.course === course && subject.semester === semester
     );
   };
 
-  const renderItem = ({ item }: { item: { id: number; name: string; code: string; is_active: string } }) => (
-    <TouchableOpacity 
-      style={styles.subjectItem} 
-      onPress={() => router.push(`/subject-detail?subjectId=${item.code}&subjectName=${item.name}`)}
+  const renderItem = ({
+    item,
+  }: {
+    item: { id: number; name: string; code: string; is_active: string };
+  }) => (
+    <TouchableOpacity
+      style={styles.subjectItem}
+      onPress={() =>
+        router.push(
+          `/subject-detail?subjectId=${item.code}&subjectName=${item.name}`
+        )
+      }
     >
       <Text style={styles.subjectText}>{item.name}</Text>
       <Text style={styles.subjectText}>{item.code}</Text>
       <View
         style={[
           styles.statusIndicator,
-          { backgroundColor: item.is_active === 'active'  ? '#4caf50' : '#f44336'  },
+          {
+            backgroundColor:
+              item.is_active === "active" ? "#4caf50" : "#f44336",
+          },
         ]}
       />
     </TouchableOpacity>
@@ -63,7 +85,12 @@ export default function SubjectsScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <ActivityIndicator size="large" color="#4a7c59" />
       </View>
     );
@@ -71,7 +98,12 @@ export default function SubjectsScreen() {
 
   if (error) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <Text style={styles.errorText}>Error: {error}</Text>
       </View>
     );
@@ -93,9 +125,17 @@ export default function SubjectsScreen() {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No subjects found for {course} - Semester {semester}</Text>
+          <Text style={styles.emptyText}>
+            No subjects found for {course} - Semester {semester}
+          </Text>
         }
       />
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push("/add-subject")}
+      >
+        <Text style={styles.buttonText}>Add Subject</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -103,50 +143,50 @@ export default function SubjectsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff9f0',
+    backgroundColor: "#fff9f0",
     borderRadius: 20,
     padding: 20,
   },
   headerRow: {
     marginTop: 50,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   profileIcon: {
-    backgroundColor: '#a9cbb7',
+    backgroundColor: "#a9cbb7",
     borderRadius: 12,
     padding: 4,
   },
   title: {
     fontSize: 50,
-    fontWeight: '400',
-    color: '#000',
+    fontWeight: "400",
+    color: "#000",
     fontFamily: "ClashDisplay",
   },
   subtitle: {
     fontSize: 24,
-    color: '#555',
+    color: "#555",
     marginBottom: 20,
-    fontWeight: '400',
+    fontWeight: "400",
     fontFamily: "ClashDisplay",
   },
   listContainer: {
     paddingBottom: 20,
   },
   subjectItem: {
-    backgroundColor: '#a9cbb7',
+    backgroundColor: "#a9cbb7",
     borderRadius: 20,
     paddingVertical: 40,
     paddingHorizontal: 30,
     marginBottom: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     shadowColor: "rgba(0, 0, 0, 0.65)",
     shadowOffset: {
       width: 2,
-      height: 4
+      height: 4,
     },
     shadowRadius: 4,
     elevation: 4,
@@ -157,8 +197,8 @@ const styles = StyleSheet.create({
   },
   subjectText: {
     fontSize: 20,
-    color: '#000',
-    fontWeight: 'regular',
+    color: "#000",
+    fontWeight: "regular",
     fontFamily: "ClashDisplay",
   },
   statusIndicator: {
@@ -168,15 +208,34 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     marginTop: 50,
     fontFamily: "ClashDisplay",
   },
   errorText: {
     fontSize: 18,
-    color: '#f44336',
-    textAlign: 'center',
+    color: "#f44336",
+    textAlign: "center",
+    fontFamily: "ClashDisplay",
+  },
+  button: {
+    width: "70%",
+    height: 60,
+    backgroundColor: "#4a7c59",
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 30,
+    marginTop: 30,
+  },
+  buttonDisabled: {
+    backgroundColor: "#cccccc",
+  },
+  buttonText: {
+    color: "#000",
+    fontSize: 26,
+    fontWeight: "100",
     fontFamily: "ClashDisplay",
   },
 });

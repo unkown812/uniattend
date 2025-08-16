@@ -1,8 +1,8 @@
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView, ActivityIndicator,Platform } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, ActivityIndicator,Platform,BackHandler } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 import { Attendance } from '../types/database';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
@@ -11,7 +11,7 @@ export default function StudentsScreen() {
   const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  
   useEffect(() => {
     if (subjectId) {
       fetchAttendanceRecords();
@@ -71,7 +71,6 @@ export default function StudentsScreen() {
     }
 
     try {
-      // Create CSV header
       const headers = ['Date', 'Name', 'Roll', 'Status', 'Subject', 'Created At'];
       
       const rows = attendanceRecords.map(record => [

@@ -8,6 +8,7 @@ import {
   Image,
   ScrollView,
   Platform,
+  BackHandler,
   Alert,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
@@ -27,6 +28,8 @@ export default function AddSubjectScreen() {
   useEffect(() => {
     fetchCourses();
   }, []);
+
+
 
   const fetchCourses = async () => {
     try {

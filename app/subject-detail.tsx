@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  BackHandler
 } from "react-native";
 import { supabase } from "../utils/supabase";
 import { Subject } from "../types/database";
@@ -24,7 +25,6 @@ export default function SubjectDetailScreen() {
       fetchSubject();
     }
   }, [subjectId,subjectName]);
-
 
   const fetchSubject = async () => {
     try {

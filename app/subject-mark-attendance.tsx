@@ -1,6 +1,6 @@
-import { useLocalSearchParams } from 'expo-router';
+import { useRouter,router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image,BackHandler } from 'react-native';
 import { supabase } from '../utils/supabase';
 import { Subject, Student } from '../types/database';
 
@@ -14,6 +14,7 @@ export default function SubjectMarkAttendanceScreen() {
   const [markingAttendance, setMarkingAttendance] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
 
+  const router=useRouter();
   useEffect(() => {
     if (subjectId) {
       fetchSubject();
@@ -25,6 +26,7 @@ export default function SubjectMarkAttendanceScreen() {
       fetchStudents();
     }
   }, [subject]);
+
 
   const fetchSubject = async () => {
     try {

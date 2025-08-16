@@ -1,9 +1,18 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, FlatList, ActivityIndicator, Alert } from 'react-native';
-import { supabase } from '../utils/supabase';
-import { Student } from '../types/database';
- 
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+  BackHandler,
+} from "react-native";
+import { supabase } from "../utils/supabase";
+import { Student } from "../types/database";
+
 export default function MarkAttendanceStudentsScreen() {
   const { subjectId, subjectName, course, semester } = useLocalSearchParams<{
     subjectId: string;
@@ -15,7 +24,9 @@ export default function MarkAttendanceStudentsScreen() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedStudents, setSelectedStudents] = useState<Set<number>>(new Set());
+  const [selectedStudents, setSelectedStudents] = useState<Set<number>>(
+    new Set()
+  );
   const [savingAttendance, setSavingAttendance] = useState(false);
 
   useEffect(() => {
@@ -28,11 +39,11 @@ export default function MarkAttendanceStudentsScreen() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('students')
-        .select('*')
-        .eq('course', course)
-        .eq('sem', parseInt(semester))
-        .order('roll', { ascending: true });
+        .from("students")
+        .select("*")
+        .eq("course", course)
+        .eq("sem", parseInt(semester))
+        .order("roll", { ascending: true });
 
       if (error) {
         throw error;
@@ -40,15 +51,15 @@ export default function MarkAttendanceStudentsScreen() {
 
       setStudents(data || []);
     } catch (err) {
-      console.error('Error fetching students:', err);
-      setError('Failed to load students');
+      console.error("Error fetching students:", err);
+      setError("Failed to load students");
     } finally {
       setLoading(false);
     }
   };
 
   const toggleStudentSelection = (studentId: number) => {
-    setSelectedStudents(prev => {
+    setSelectedStudents((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(studentId)) {
         newSet.delete(studentId);
@@ -61,15 +72,15 @@ export default function MarkAttendanceStudentsScreen() {
 
   const saveAttendance = async () => {
     if (!subjectId || !subjectName || !course || !semester) {
-      Alert.alert('Error', 'Missing required information');
+      Alert.alert("Error", "Missing required information");
       return;
     }
 
     setSavingAttendance(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
-      
-      const attendanceRecords = students.map(student => ({
+      const today = new Date().toISOString().split("T")[0];
+
+      const attendanceRecords = students.map((student) => ({
         name: student.username,
         roll: student.roll,
         subject: subjectName,
@@ -80,19 +91,19 @@ export default function MarkAttendanceStudentsScreen() {
       }));
 
       const { error } = await supabase
-        .from('attendance')
+        .from("attendance")
         .insert(attendanceRecords);
 
       if (error) {
         throw error;
       }
 
-      Alert.alert('Success', 'Attendance saved successfully', [
-        { text: 'OK', onPress: () => router.back() }
+      Alert.alert("Success", "Attendance saved successfully", [
+        { text: "OK", onPress: () => router.back() },
       ]);
     } catch (err) {
-      console.error('Error saving attendance:', err);
-      Alert.alert('Error', 'Failed to save attendance');
+      console.error("Error saving attendance:", err);
+      Alert.alert("Error", "Failed to save attendance");
     } finally {
       setSavingAttendance(false);
     }
@@ -102,7 +113,7 @@ export default function MarkAttendanceStudentsScreen() {
     <TouchableOpacity
       style={[
         styles.studentItem,
-        selectedStudents.has(item.id) && styles.selectedStudent
+        selectedStudents.has(item.id) && styles.selectedStudent,
       ]}
       onPress={() => toggleStudentSelection(item.id)}
     >
@@ -110,10 +121,12 @@ export default function MarkAttendanceStudentsScreen() {
         <Text style={styles.studentName}>{item.username}</Text>
         <Text style={styles.studentRoll}>Roll: {item.roll}</Text>
       </View>
-      <View style={[
-        styles.checkbox,
-        selectedStudents.has(item.id) && styles.checkboxSelected
-      ]}>
+      <View
+        style={[
+          styles.checkbox,
+          selectedStudents.has(item.id) && styles.checkboxSelected,
+        ]}
+      >
         {selectedStudents.has(item.id) && (
           <Text style={styles.checkmark}>✓</Text>
         )}
@@ -141,7 +154,7 @@ export default function MarkAttendanceStudentsScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Mark Attendance</Text>
       <Text style={styles.subtitle}>{subjectName}</Text>
-      
+
       <View style={styles.header}>
         <Text style={styles.headerText}>Course: {course}</Text>
         <Text style={styles.headerText}>Semester: {semester}</Text>
@@ -165,7 +178,7 @@ export default function MarkAttendanceStudentsScreen() {
           disabled={savingAttendance}
         >
           <Text style={styles.saveButtonText}>
-            {savingAttendance ? 'Saving...' : 'Save Attendance'}
+            {savingAttendance ? "Saving..." : "Save Attendance"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -176,36 +189,36 @@ export default function MarkAttendanceStudentsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff9f0',
+    backgroundColor: "#fff9f0",
     padding: 20,
   },
   title: {
     fontSize: 32,
-    fontWeight: '400',
-    color: '#000',
+    fontWeight: "400",
+    color: "#000",
     fontFamily: "ClashDisplay",
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 50,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 24,
-    fontWeight: '400',
-    color: '#000',
+    fontWeight: "400",
+    color: "#000",
     fontFamily: "ClashDisplay",
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 20,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
     paddingHorizontal: 10,
   },
   headerText: {
     fontSize: 16,
-    fontWeight: '400',
-    color: '#000',
+    fontWeight: "400",
+    color: "#000",
     fontFamily: "ClashDisplay",
   },
   studentList: {
@@ -213,31 +226,31 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   studentItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 15,
     marginVertical: 5,
-    backgroundColor: '#a9cbb7',
+    backgroundColor: "#a9cbb7",
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#000',
+    borderColor: "#000",
   },
   selectedStudent: {
-    backgroundColor: '#4a7c59',
+    backgroundColor: "#4a7c59",
   },
   studentInfo: {
     flex: 1,
   },
   studentName: {
     fontSize: 18,
-    fontWeight: '400',
-    color: '#000',
+    fontWeight: "400",
+    color: "#000",
     fontFamily: "ClashDisplay",
   },
   studentRoll: {
     fontSize: 14,
-    color: '#000',
+    color: "#000",
     fontFamily: "ClashDisplay",
   },
   checkbox: {
@@ -245,32 +258,32 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 15,
     borderWidth: 2,
-    borderColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
   },
   checkboxSelected: {
-    backgroundColor: '#4a7c59',
-    borderColor: '#000',
+    backgroundColor: "#4a7c59",
+    borderColor: "#000",
   },
   checkmark: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   footer: {
     paddingVertical: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   selectionText: {
     fontSize: 16,
-    fontWeight: '400',
-    color: '#000',
+    fontWeight: "400",
+    color: "#000",
     fontFamily: "ClashDisplay",
     marginBottom: 10,
   },
   saveButton: {
-    backgroundColor: '#4a7c59',
+    backgroundColor: "#4a7c59",
     borderRadius: 20,
     paddingVertical: 15,
     paddingHorizontal: 40,
@@ -280,17 +293,17 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: 20,
-    fontWeight: '400',
-    color: '#000',
+    fontWeight: "400",
+    color: "#000",
     fontFamily: "ClashDisplay",
   },
   disabledButton: {
-    backgroundColor: '#cccccc',
+    backgroundColor: "#cccccc",
   },
   errorText: {
     fontSize: 18,
-    color: 'red',
-    textAlign: 'center',
+    color: "red",
+    textAlign: "center",
     marginTop: 50,
   },
 });
